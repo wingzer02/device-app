@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.practiceBack.mapper.UserMapper">
+
+    <!--회원가입-->
+    <insert id="insertUser" parameterType="com.example.practiceBack.dto.User">
+        INSERT INTO user (userid, password, email, name)
+        VALUES (#{userid}, #{password}, #{email}, #{name});
+    </insert>
+
+    <select id="findAll" resultType="com.example.practiceBack.dto.User">
+        SELECT
+        userid,
+        name,
+        email,
+        created_at
+        FROM user;
+    </select>
+
+    <select id="findByUserid" parameterType="string" resultType="com.example.practiceBack.dto.User">
+        SELECT *
+        FROM user
+        WHERE userid = #{userid};
+    </select>
+
+    <update id="updateRefreshToken">
+        UPDATE user
+        SET
+        refresh_token = #{refreshToken}
+        WHERE userid = #{userid};
+    </update>
+
+    <select id="findByRefreshToken" parameterType="string" resultType="com.example.practiceBack.dto.User">
+        SELECT *
+        FROM user
+        WHERE refresh_token = #{refreshToken};
+    </select>
+</mapper>

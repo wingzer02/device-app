@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.practiceBack.mapper.DeviceMapper">
+
+    <select id="findAll" resultType="com.example.practiceBack.dto.Device">
+        SELECT
+        d.id,
+        d.serial_number,
+        d.cat_id,
+        d.userid,
+        d.start_date,
+        d.end_date,
+        u.name AS user_name,
+        c.cat_name
+        FROM device d
+        LEFT JOIN user u ON u.userid = d.userid
+        LEFT JOIN category c ON c.cat_id = d.cat_id;
+    </select>
+
+    <select id="findBySerialNumber" parameterType="string" resultType="com.example.practiceBack.dto.Device">
+        SELECT *
+        FROM device
+        WHERE serial_number = #{serialNumber};
+    </select>
+
+    <insert id="insertDevice" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO device (serial_number, cat_id)
+        VALUES (#{serialNumber}, #{catId});
+    </insert>
+
+    <update id="updateDeviceUser" parameterType="com.example.practiceBack.dto.Device">
+        UPDATE device
+        SET
+        userid = #{userid},
+        start_date = #{startDate}
+        WHERE serial_number = #{serialNumber}
+    </update>
+
+    <delete id="deleteBySerialNumber" parameterType="string">
+        DELETE FROM device
+        WHERE serial_number = #{serialNumber};
+    </delete>
+
+</mapper>

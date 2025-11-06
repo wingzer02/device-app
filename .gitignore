@@ -1,0 +1,31 @@
+# 공통
+node_modules/
+dist/
+build/
+coverage/
+*.log
+.DS_Store
+
+# 환경 변수
+.env
+.env.*
+*.local
+
+# 프론트엔드
+/frontend/node_modules/
+/frontend/dist/
+/frontend/build/
+/frontend/.env
+/frontend/.env.*
+
+# 백엔드(Node 기준)
+/practiceBack/node_modules/
+/practiceBack/dist/
+/practiceBack/build/
+/practiceBack/.env
+/practiceBack/.env.*
+
+# (백엔드가 Java라면 아래도 추가)
+/practiceBack/target/
+/practiceBack/.gradle/
+/practiceBack/.idea/
