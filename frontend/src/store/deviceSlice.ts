@@ -107,41 +107,13 @@ const deviceSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
+      // 장치 전체 조회
       .addCase(fetchDevices.fulfilled, (state, action) => {
         state.list = action.payload;
       })
       .addCase(fetchDevices.rejected, (state) => {
         state.list = [];
       })
-
-      .addCase(addDevice.fulfilled, (state, action) => {
-        state.list.push(action.payload);
-      })
-      .addCase(addDevice.rejected, (state) => {
-        state.list = [];
-      })
-
-      .addCase(deleteDevice.fulfilled, (state, action) => {
-        state.list = state.list.filter(
-          (device) => device.serialNumber !== action.payload
-        );
-      })
-      .addCase(deleteDevice.rejected, (state) => {
-        state.list = [];
-      })
-
-      .addCase(registerDeviceUser.fulfilled, (state, action) => {
-        const updatedDevice = action.payload;
-        if (updatedDevice) {
-          const idx = state.list.findIndex(
-            (d: any) => d.serialNumber === updatedDevice.serialNumber
-          );
-          if (idx >= 0) state.list[idx] = updatedDevice;
-        }
-      })
-      .addCase(registerDeviceUser.rejected, (state) => {
-        state.list = [];
-      });
   },
 });
 

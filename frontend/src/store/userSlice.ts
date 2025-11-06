@@ -5,7 +5,6 @@ export interface User {
   userid: string;
   name: string;
   email: string;
-  createdAt?: string;
 }
 
 interface UserState {
@@ -74,7 +73,8 @@ export const loginUser = createAsyncThunk(
       password 
     }: { 
       userid: string; 
-      password: string },
+      password: string
+    },
     thunkAPI
   ) => {
     try {
@@ -116,6 +116,9 @@ export const refreshAccessToken = createAsyncThunk(
   }
 );
 
+/**
+ * 사용자 전체 조회
+ */
 export const fetchAllUsers = createAsyncThunk(
   "users/fetchAll", 
   async () => {
@@ -174,6 +177,7 @@ const userSlice = createSlice({
         state.error = "토큰 갱신 실패";
       })
 
+      // 사용자 전체 조회
       .addCase(fetchAllUsers.fulfilled, (state, action) => {
         state.list = action.payload;
       })

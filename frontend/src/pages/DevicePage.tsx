@@ -1,4 +1,4 @@
-import React, { use, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import AddDeviceModal from "../components/AddDeviceModal";
 import { useAppDispatch, useAppSelector } from "../hooks/useApp";
 import { deleteDevice, fetchDevices } from "../store/deviceSlice";
@@ -15,7 +15,7 @@ const DevicePage: React.FC = () => {
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
-  // 페이지 진입 시 장치 목록 자동 조회
+  // 페이지 진입 시 장치 목록 조회
   useEffect(() => {
     dispatch(fetchDevices());
   }, [dispatch]);

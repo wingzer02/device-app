@@ -31,12 +31,14 @@ const categorySlice = createSlice({
   initialState,
   reducers: {},
   extraReducers: (builder) => {
-    builder.addCase(fetchCategories.fulfilled, (state, action) => {
-      state.list = action.payload;
-    });
-    builder.addCase(fetchCategories.rejected, (state) => {
-      state.list = [];
-    });
+    builder
+      // 장치분류 전체 조회
+      .addCase(fetchCategories.fulfilled, (state, action) => {
+        state.list = action.payload;
+      })
+      .addCase(fetchCategories.rejected, (state) => {
+        state.list = [];
+      })
   },
 });
 

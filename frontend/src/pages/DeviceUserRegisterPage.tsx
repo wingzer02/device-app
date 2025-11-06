@@ -14,6 +14,7 @@ const DeviceUserRegister: React.FC = () => {
   const [userid, setUserid] = useState("");
   const [startDate, setStartDate] = useState("");
 
+  // 페이지 진입 시 유저 목록 조회
   useEffect(() => {
     dispatch(fetchAllUsers());
   }, [dispatch]);
