@@ -4,12 +4,13 @@ import com.example.practiceBack.dto.User;
 import com.example.practiceBack.dto.LoginRequest;
 import com.example.practiceBack.service.UserService;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/user")
 public class UserController {
     private final UserService userService;
 
@@ -25,9 +26,8 @@ public class UserController {
 
     // 회원가입
     @PostMapping("/register")
-    public String insert(@RequestBody User user) {
+    public void insert(@RequestBody User user) {
         userService.register(user);
-        return "회원가입 성공!";
     }
 
     // 로그인
@@ -36,10 +36,44 @@ public class UserController {
         return userService.login(req);
     }
 
-    // 토큰갱신
-    @PostMapping("/refresh")
-    public Map<String, String> refresh(@RequestBody Map<String, String> req) {
-        String refreshToken = req.get("refreshToken");
-        return userService.refreshAccessToken(refreshToken);
+    // 사용자 정보 조회
+    @GetMapping("/{userid}")
+    public User getByUserid(@PathVariable String userid) {
+        return userService.findByUserid(userid);
+    }
+
+    // 사용자 정보 갱신
+    @PutMapping("/{userid}")
+    public User update(@PathVariable String userid,
+                       @RequestPart("user") User user,
+                       @RequestPart(value = "file", required = false)MultipartFile file) throws Exception {
+
+        user.setUserid(userid);
+
+        String url = userService.storeProfileImage(file, userid);
+        if (url != null) {
+            user.setPhotoUrl(url);
+        }
+        userService.updateUser(user);
+        return userService.findByUserid(userid);
+    }
+
+    // 사용자 정보 삭제
+    @PostMapping("/{userid}")
+    public void deleteUser(@PathVariable String userid) {
+        userService.deleteUser(userid);
+    }
+
+    // 사용자 권한 갱신
+    @PostMapping("/updateRole")
+    public void updateRole(@RequestBody User user) {
+        userService.updateRole(user);
+    }
+
+    // 토큰 재발급 (미완성_테스트중)
+    @PostMapping("/reissue")
+    public Map<String, String> reissue(@RequestBody Map<String, String> body) {
+        String refreshToken = body.get("refreshToken");
+        return userService.reissueTokens(refreshToken);
     }
 }

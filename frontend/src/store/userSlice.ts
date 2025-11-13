@@ -5,27 +5,36 @@ export interface User {
   userid: string;
   name: string;
   email: string;
+  password: string;
+  photoUrl: string;
+  role: string;
+  roleName: string;
+  delFlg: boolean;
 }
 
 interface UserState {
-  accessToken: string | null;
-  refreshToken: string | null;
-  error: string | null;
-  success: boolean;
   isAuthenticated: boolean;
   list: User[];
+  profile: User;
 }
 
 const initialState: UserState = {
-  accessToken: localStorage.getItem("accessToken"),
-  refreshToken: localStorage.getItem("refreshToken"),
-  error: null,
-  success: false,
-  isAuthenticated: !!localStorage.getItem("accessToken"),
+  isAuthenticated: false,
   list: [],
+  profile: {
+    userid: "",
+    name: "",
+    email: "",
+    password: "",
+    photoUrl: "",
+    role: "",
+    roleName: "",
+    delFlg: false,
+  },
 };
 
-const API_BASE_URL = "http://localhost:8080/api/users";
+const API_BASE_URL = "http://localhost:8080/api/user";
+const ERR_MSG_USE_DIFFERENT_ID = " 다른 아이디를 사용해주세요.";
 
 /**
  * 회원가입
@@ -37,14 +46,15 @@ export const registerUser = createAsyncThunk(
       userid, 
       password, 
       email, 
-      name 
+      name,
+      role 
     }: { 
       userid: string; 
       password: string, 
       email: string, 
-      name: string 
-    },
-    thunkAPI
+      name: string,
+      role: string 
+    }, { rejectWithValue }    
   ) => {
     try {
       const res = await axios.post(`${API_BASE_URL}/register`, {
@@ -52,12 +62,14 @@ export const registerUser = createAsyncThunk(
         password,
         email,
         name,
+        role
       });
       return res.data;
-    } catch (error: any) {
-      return thunkAPI.rejectWithValue(
-        "회원가입 실패"
-      );
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const message = error.response?.data.message;
+        return rejectWithValue(message + ERR_MSG_USE_DIFFERENT_ID);
+      } 
     }
   }
 );
@@ -74,44 +86,19 @@ export const loginUser = createAsyncThunk(
     }: { 
       userid: string; 
       password: string
-    },
-    thunkAPI
+    }, { rejectWithValue }
   ) => {
     try {
       const res = await axios.post(`${API_BASE_URL}/login`, {
         userid,
         password,
       });
-      const data = res.data;
-      localStorage.setItem("accessToken", data.accessToken);
-      localStorage.setItem("refreshToken", data.refreshToken);
-      return data;
-    } catch (error: any) {
-      return thunkAPI.rejectWithValue(
-        "로그인 실패"
-      );
-    }
-  }
-);
-
-/**
- * Access Token 갱신
- */
-export const refreshAccessToken = createAsyncThunk(
-  "user/refresh",
-  async (_, thunkAPI) => {
-    try {
-      const refreshToken = localStorage.getItem("refreshToken");
-      const res = await axios.post(`${API_BASE_URL}/refresh`, {
-        refreshToken,
-      });
-      const data = res.data;
-      localStorage.setItem("accessToken", data.accessToken);
-      return data.accessToken;
-    } catch (error: any) {
-      return thunkAPI.rejectWithValue(
-        "토큰 갱신 실패"
-      );
+      return res.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const message = error.response?.data.message;
+        return rejectWithValue(message);
+      } 
     }
   }
 );
@@ -120,9 +107,69 @@ export const refreshAccessToken = createAsyncThunk(
  * 사용자 전체 조회
  */
 export const fetchAllUsers = createAsyncThunk(
-  "users/fetchAll", 
+  "user/fetchAll", 
   async () => {
     const res = await axios.get<User[]>(API_BASE_URL);
+    return res.data;
+  }
+);
+
+/**
+ * 사용자 정보 조회
+ */
+export const fetchUserByUserid = createAsyncThunk(
+  "user/fetchUserByUserid",
+  async (userid: string) => {
+    const res = await axios.get(`${API_BASE_URL}/${userid}`);
+    return res.data;
+  }
+);
+
+/**
+ * 사용자 정보 갱신
+ */
+export const updateUser = createAsyncThunk(
+  "user/update",
+  async ({ userid, formData }: 
+    {
+      userid: string;
+      formData: FormData;
+    }
+  ) => {
+    const res = await axios.put(`${API_BASE_URL}/${userid}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return res.data;
+  }
+);
+
+/**
+ * 사용자 탈퇴
+ */
+export const deleteUser = createAsyncThunk(
+  "user/delete",
+  async (userid: string) => {
+    const res = await axios.post(`${API_BASE_URL}/${userid}`);
+    return res.data;
+  }
+);
+
+/**
+ * 사용자 권한 갱신
+ */
+export const updateRole = createAsyncThunk(
+  "user/updateRole",
+  async ({ userid, role }: 
+    { 
+      userid: string;
+      role: string;
+    }
+  ) => {
+    const res = await axios.post(
+      `${API_BASE_URL}/updateRole`, {
+      userid,
+      role
+    });
     return res.data;
   }
 );
@@ -134,47 +181,29 @@ const userSlice = createSlice({
     logout: (state) => {
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
-      state.accessToken = null;
-      state.refreshToken = null;
+      localStorage.removeItem("userid");
       state.isAuthenticated = false;
-      state.success = false;
-      state.error = null;
+      state.profile = { 
+        userid: "", 
+        name: "", 
+        email: "", 
+        password: "", 
+        photoUrl: "", 
+        role: "", 
+        roleName: "",
+        delFlg: false,
+      };
     },
   },
   extraReducers: (builder) => {
     builder
-      // 회원가입
-      .addCase(registerUser.pending, (state) => {
-        state.error = null;
-      })
-      .addCase(registerUser.fulfilled, (state) => {
-        state.success = true;
-      })
-      .addCase(registerUser.rejected, (state) => {
-        state.error = "회원가입 실패";
-      })
-
       // 로그인
-      .addCase(loginUser.pending, (state) => {
-        state.error = null;
-        state.success = false;
-      })
       .addCase(loginUser.fulfilled, (state, action) => {
-        state.success = true;
-        state.accessToken = action.payload.accessToken;
-        state.refreshToken = action.payload.refreshToken;
         state.isAuthenticated = true;
-      })
-      .addCase(loginUser.rejected, (state) => {
-        state.error = "로그인 실패";
-      })
-
-      // 토큰 갱신
-      .addCase(refreshAccessToken.fulfilled, (state, action) => {
-        state.accessToken = action.payload;
-      })
-      .addCase(refreshAccessToken.rejected, (state) => {
-        state.error = "토큰 갱신 실패";
+        const userid = action.meta.arg.userid;
+        localStorage.setItem("userid", userid);
+        localStorage.setItem("accessToken", action.payload.accessToken);
+        localStorage.setItem("refreshToken", action.payload.refreshToken);
       })
 
       // 사용자 전체 조회
@@ -183,7 +212,16 @@ const userSlice = createSlice({
       })
       .addCase(fetchAllUsers.rejected, (state) => {
         state.list = [];
-      });
+      })
+
+      .addCase(fetchUserByUserid.fulfilled, (state, action) => {
+        state.profile = action.payload;
+      })
+
+      // 사용자 정보 갱신
+      .addCase(updateUser.fulfilled, (state, action) => {
+        state.profile = action.payload;
+      })
   },
 });
 

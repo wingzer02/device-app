@@ -9,8 +9,8 @@ import {
   Typography,
   Paper,
   Link,
-  Alert,
 } from "@mui/material";
+import { REGISTER_COMPLETE } from "../utils/text"
 
 const RegisterPage: React.FC = () => {
   const [form, setForm] = useState({
@@ -18,24 +18,26 @@ const RegisterPage: React.FC = () => {
     name: "",
     password: "",
     email: "",
+    role: "",
   });
-  const [error, setError] = useState("");
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const res = await dispatch(registerUser(form));
-    if (res.meta.requestStatus === "fulfilled") {
-      alert("회원가입이 완료되었습니다. 로그인해주세요.");
+    try {
+      await dispatch(registerUser(form)).unwrap();
+      alert(REGISTER_COMPLETE);
       navigate("/");
-    } else {
-      setError("회원가입 중 오류가 발생했습니다.");
+    } catch (error) {
+      alert(error);
     }
   };
 
   return (
-    <Box
+    <Box 
+      component="form"
+      onSubmit={handleSubmit}
       sx={{
         display: "flex",
         justifyContent: "center",
@@ -48,7 +50,6 @@ const RegisterPage: React.FC = () => {
         <Typography variant="h5" textAlign="center" gutterBottom>
           회원가입
         </Typography>
-        <form onSubmit={handleSubmit}>
           <TextField
             fullWidth
             label="아이디"
@@ -87,11 +88,6 @@ const RegisterPage: React.FC = () => {
             onChange={(e) => setForm({ ...form, password: e.target.value })}
             required
           />
-          {error && (
-            <Alert severity="error" sx={{ mt: 1 }}>
-              {error}
-            </Alert>
-          )}
           <Button
             fullWidth
             variant="contained"
@@ -101,7 +97,6 @@ const RegisterPage: React.FC = () => {
           >
             회원가입
           </Button>
-        </form>
         <Typography textAlign="center" sx={{ mt: 2 }}>
           이미 계정이 있으신가요?{" "}
           <Link

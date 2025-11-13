@@ -38,18 +38,8 @@ public class JwtUtil {
                 .compact();
     }
 
-    // 토큰 파기(로그아웃)
-    public boolean isTokenExpired(String token) {
-        try {
-            Date exp = Jwts.parserBuilder()
-                    .setSigningKey(key)
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody()
-                    .getExpiration();
-            return exp.before(new Date());
-        } catch (JwtException e) {
-            return true;
-        }
+    public String extractUserid(String token) {
+        return Jwts.parserBuilder().setSigningKey(key).build()
+                .parseClaimsJws(token).getBody().getSubject();
     }
 }

@@ -28,25 +28,12 @@ public class DeviceService {
     }
 
     // 장비 사용자 DB 등록
-    public Device registerDeviceUser(Device device) {
-        // 일련번호로 장비 검색
-        Device existing = deviceMapper.findBySerialNumber(device.getSerialNumber());
-        if (existing == null) {
-            throw new RuntimeException("해당 일련번호의 장치를 찾을 수 없습니다.");
-        }
-
-        // DB 업데이트
+    public void registerDeviceUser(Device device) {
         deviceMapper.updateDeviceUser(device);
-
-        // 최신 데이터 반환
-        return deviceMapper.findBySerialNumber(device.getSerialNumber());
     }
 
     // 장비 DB 삭제
     public void deleteDeviceBySerial(String serialNumber) {
-        int deleted = deviceMapper.deleteBySerialNumber(serialNumber);
-        if (deleted == 0) {
-            throw new RuntimeException("장치가 삭제되지 않았습니다: " + serialNumber);
-        }
+        deviceMapper.deleteBySerialNumber(serialNumber);
     }
 }

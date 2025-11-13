@@ -20,12 +20,6 @@
         LEFT JOIN category c ON c.cat_id = d.cat_id;
     </select>
 
-    <select id="findBySerialNumber" parameterType="string" resultType="com.example.practiceBack.dto.Device">
-        SELECT *
-        FROM device
-        WHERE serial_number = #{serialNumber};
-    </select>
-
     <insert id="insertDevice" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO device (serial_number, cat_id)
         VALUES (#{serialNumber}, #{catId});
@@ -35,7 +29,8 @@
         UPDATE device
         SET
         userid = #{userid},
-        start_date = #{startDate}
+        start_date = #{startDate},
+        end_date = #{endDate}
         WHERE serial_number = #{serialNumber}
     </update>
 

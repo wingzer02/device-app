@@ -8,6 +8,9 @@ public class User {
     private String name;
     private String password;
     private String email;
-    private String createdAt;
     private String refreshToken;
+    private String photoUrl;
+    private String role;
+    private String roleName;
+    private boolean delFlg;
 }

@@ -1,13 +1,17 @@
 package com.example.practiceBack.service;
 
-import com.example.practiceBack.dto.Device;
 import com.example.practiceBack.dto.User;
 import com.example.practiceBack.dto.LoginRequest;
 import com.example.practiceBack.mapper.UserMapper;
 import com.example.practiceBack.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +46,10 @@ public class UserService {
             throw new RuntimeException("존재하지 않는 사용자입니다.");
         }
 
+        if (!user.getPassword().equals(req.getPassword())) {
+            throw new RuntimeException("잘못된 비밀번호입니다.");
+        }
+
         // 액세스토큰 생성
         String accessToken = jwtUtil.generateAccessToken(user.getUserid());
         // 리프레시토큰 생성
@@ -55,23 +63,69 @@ public class UserService {
         return tokens;
     }
 
-    // 액세스토큰 갱신
-    public Map<String, String> refreshAccessToken(String refreshToken) {
-        // 리프레시토큰으로 사용자 DB 검색
-        User user = userMapper.findByRefreshToken(refreshToken);
-        if (user == null || jwtUtil.isTokenExpired(refreshToken)) {
-            throw new RuntimeException("유효하지 않은 리프레시 토큰입니다.");
-        }
-
-        // 새로운 액세스토큰 생성
-        String newAccessToken = jwtUtil.generateAccessToken(user.getUserid());
-        Map<String, String> result = new HashMap<>();
-        result.put("accessToken", newAccessToken);
-        return result;
-    }
-
     // 사용자 전체 조회
     public List<User> findAll() {
         return userMapper.findAll();
+    }
+
+    // 사용자 정보 조회
+    public User findByUserid(String userid) {
+        return userMapper.findByUserid(userid);
+    }
+
+    // 사용자 정보 갱신
+    public void updateUser(User user) {
+        userMapper.updateUser(user);
+    }
+
+    // 사용자 삭제
+    public void deleteUser(String userid) {
+        userMapper.deleteUser(userid);
+    }
+
+    // 사용자 권한 갱신
+    public void updateRole(User user) {
+        userMapper.updateRole(user);
+    }
+
+    // 프로필 이미지 업로드
+    public String storeProfileImage(MultipartFile file, String userid) throws IOException {
+        String uploadRoot = "C:/myapp/uploads";
+        if (file == null || file.isEmpty()) {
+            return null;
+        }
+
+        // 확장자 처리
+        String ext = ".jpg";
+        String orig = file.getOriginalFilename();
+        if (orig != null && orig.contains(".")) {
+            String e = orig.substring(orig.lastIndexOf('.')).toLowerCase();
+            if (e.equals(".jpg") || e.equals(".jpeg") || e.equals(".png")){
+                ext = ".jpg";
+            }
+        }
+
+        Path dir = Paths.get(uploadRoot, "profile");
+        Files.createDirectories(dir);
+
+        String filename = userid + "_" + System.currentTimeMillis() + ext;
+        Path dest = dir.resolve(filename);
+        file.transferTo(dest.toFile());
+
+        return "/uploads/profile/" + filename;
+    }
+
+    public Map<String, String> reissueTokens(String refreshToken) {
+        String userid = jwtUtil.extractUserid(refreshToken);
+
+        String newAccess = jwtUtil.generateAccessToken(userid);
+        String newRefresh = jwtUtil.generateRefreshToken(userid);
+
+        userMapper.updateRefreshToken(userid, newRefresh);
+
+        Map<String, String> res = new HashMap<>();
+        res.put("accessToken", newAccess);
+        res.put("refreshToken", newRefresh);
+        return res;
     }
 }

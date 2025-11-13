@@ -16,7 +16,7 @@ import { fetchCategories } from "../store/categorySlice";
 interface AddDeviceModalProps {
   open: boolean;
   onClose: () => void;
-  onSuccess?: () => void; 
+  onSuccess: () => void; 
 }
 
 const AddDeviceModal: React.FC<AddDeviceModalProps> = ({
@@ -28,7 +28,7 @@ const AddDeviceModal: React.FC<AddDeviceModalProps> = ({
   const dispatch = useAppDispatch();
   const categories = useAppSelector((s) => s.category.list);
 
-  const [form, setForm] = useState<{ serialNumber: string; catId: string }>({
+  const [form, setForm] = useState({
     serialNumber: "",
     catId: "", 
   });
@@ -55,11 +55,10 @@ const AddDeviceModal: React.FC<AddDeviceModalProps> = ({
       catId: form.catId,
     })).unwrap();
 
-    alert("장치가 등록되었습니다.");
+    alert("장비가 등록되었습니다.");
     onClose();
-    if (onSuccess) {
-      onSuccess();
-    }
+    onSuccess();
+
     // 등록이 완료되면 입력항목 초기화
     setForm({ 
       serialNumber: "", 
@@ -78,7 +77,7 @@ const AddDeviceModal: React.FC<AddDeviceModalProps> = ({
   
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle>장치 등록</DialogTitle>
+      <DialogTitle>장비 등록</DialogTitle>
       <DialogContent>
         <Box
           component="form"
@@ -96,7 +95,7 @@ const AddDeviceModal: React.FC<AddDeviceModalProps> = ({
           />
           <TextField
             select
-            label="장치분류"
+            label="분류"
             variant="outlined"
             required
             value={form.catId}
@@ -111,7 +110,7 @@ const AddDeviceModal: React.FC<AddDeviceModalProps> = ({
             ))}
           </TextField>
           <DialogActions sx={{ px: 0 }}>
-            <Button type="submit" variant="contained" color="primary">
+            <Button type="submit" variant="contained">
               등록
             </Button>
             <Button onClick={handleCancel} variant="outlined" color="secondary">

@@ -13,8 +13,18 @@ public interface UserMapper {
 
     // 회원가입
     void insertUser(User user);
+
+    // 사용자 정보 갱신
+    void updateUser(User user);
+
+    // 사용자 조회
     User findByUserid(String userid);
 
+    // 회원탈퇴
+    void deleteUser(String userid);
+
+    // 사용자 권한 갱신
+    void updateRole(User user);
+
     void updateRefreshToken(@Param("userid") String userid, @Param("refreshToken") String refreshToken);
-    User findByRefreshToken(String refreshToken);
 }

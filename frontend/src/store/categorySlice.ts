@@ -1,4 +1,3 @@
-// frontend/src/store/categorySlice.ts
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
@@ -32,7 +31,7 @@ const categorySlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      // 장치분류 전체 조회
+      // 분류 전체 조회
       .addCase(fetchCategories.fulfilled, (state, action) => {
         state.list = action.payload;
       })

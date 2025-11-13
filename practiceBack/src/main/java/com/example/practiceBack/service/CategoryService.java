@@ -13,7 +13,7 @@ public class CategoryService {
     @Autowired
     private final CategoryMapper categoryMapper;
 
-    public CategoryService(CategoryMapper categoryMapper) {
+    public CategoryService (CategoryMapper categoryMapper) {
         this.categoryMapper = categoryMapper;
     }
 

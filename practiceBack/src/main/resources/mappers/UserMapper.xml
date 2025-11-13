@@ -13,18 +13,39 @@
 
     <select id="findAll" resultType="com.example.practiceBack.dto.User">
         SELECT
-        userid,
-        name,
-        email,
-        created_at
-        FROM user;
+        u.userid,
+        u.name,
+        u.email,
+        u.del_flg,
+        u.role,
+        r.role_name
+        FROM user u
+        LEFT JOIN role r ON u.role = r.role_id;
     </select>
 
     <select id="findByUserid" parameterType="string" resultType="com.example.practiceBack.dto.User">
-        SELECT *
-        FROM user
-        WHERE userid = #{userid};
+        SELECT
+        u.userid,
+        u.name,
+        u.password,
+        u.email,
+        u.photo_url,
+        u.role,
+        r.role_name
+        FROM user u
+        LEFT JOIN role r ON u.role = r.role_id
+        WHERE userid = #{userid}
+        AND NOT del_flg = TRUE;
     </select>
+
+    <update id="updateUser" parameterType="com.example.practiceBack.dto.User">
+        UPDATE user
+        SET
+        password = #{password},
+        email = #{email},
+        photo_url = #{photoUrl}
+        WHERE userid = #{userid};
+    </update>
 
     <update id="updateRefreshToken">
         UPDATE user
@@ -33,9 +54,18 @@
         WHERE userid = #{userid};
     </update>
 
-    <select id="findByRefreshToken" parameterType="string" resultType="com.example.practiceBack.dto.User">
-        SELECT *
-        FROM user
-        WHERE refresh_token = #{refreshToken};
-    </select>
+    <update id="deleteUser">
+        UPDATE user
+        SET
+        del_flg = TRUE
+        WHERE userid = #{userid};
+    </update>
+
+    <update id="updateRole" parameterType="com.example.practiceBack.dto.User">
+        UPDATE user
+        SET
+        role = #{role}
+        WHERE userid = #{userid};
+    </update>
+
 </mapper>

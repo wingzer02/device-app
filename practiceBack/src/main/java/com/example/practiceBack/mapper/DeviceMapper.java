@@ -9,7 +9,6 @@ import java.util.List;
 public interface DeviceMapper {
     List<Device> findAll();
     void insertDevice(Device device);
-    Device findBySerialNumber(@Param("serialNumber") String serialNumber);
     void updateDeviceUser(Device device);
-    int deleteBySerialNumber(@Param("serialNumber") String serialNumber);
+    void deleteBySerialNumber(@Param("serialNumber") String serialNumber);
 }

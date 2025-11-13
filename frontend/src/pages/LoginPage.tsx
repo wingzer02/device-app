@@ -9,7 +9,6 @@ import {
   Typography,
   Paper,
   Link,
-  Alert,
 } from "@mui/material";
 
 const LoginPage: React.FC = () => {
@@ -19,16 +18,24 @@ const LoginPage: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (isAuthenticated) navigate("/devices");
+    if (isAuthenticated) {
+      navigate("/devices");
+    } 
   }, [isAuthenticated, navigate]);
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    dispatch(loginUser(form));
+  const handleLogin = async (e: React.FormEvent) => {
+    try {
+      e.preventDefault();
+      await dispatch(loginUser(form)).unwrap();
+    } catch (error) {
+      alert(error);
+    }
   };
 
   return (
-    <Box
+    <Box 
+      component="form"
+      onSubmit={handleLogin}
       sx={{
         display: "flex",
         justifyContent: "center",
@@ -41,7 +48,6 @@ const LoginPage: React.FC = () => {
         <Typography variant="h5" textAlign="center" gutterBottom>
           로그인
         </Typography>
-        <form onSubmit={handleLogin}>
           <TextField
             fullWidth
             label="아이디"
@@ -64,13 +70,11 @@ const LoginPage: React.FC = () => {
           <Button
             fullWidth
             variant="contained"
-            color="primary"
             type="submit"
             sx={{ mt: 2, py: 1.2 }}
           >
             로그인
           </Button>
-        </form>
         <Typography textAlign="center" sx={{ mt: 2 }}>
           아직 계정이 없으신가요?{" "}
           <Link
