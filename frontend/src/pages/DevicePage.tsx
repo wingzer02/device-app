@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import AddDeviceModal from "../components/AddDeviceModal";
 import { useAppDispatch, useAppSelector } from "../hooks/useApp";
 import { deleteDevice, Device, fetchDevices } from "../store/deviceSlice";
-import { fetchUserByUserid, logout } from "../store/userSlice";
+import { logoutUser  } from "../store/userSlice";
 import { useNavigate, Link as RouterLink } from "react-router-dom";
 import { 
   AppBar,
@@ -27,12 +27,9 @@ import {
   Tooltip,
   Link,
   Avatar,
-  Menu,
-  MenuItem,
  } from "@mui/material";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import { toUploadsUrl } from "../utils/url"; 
 import { 
   USER_NAME_NULL,
@@ -41,6 +38,7 @@ import {
   TOOLTIP_LOGOUT,
   WARNING_GUEST,
 } from "../utils/text";
+import ManagementSidebar from "../components/ManagementSidebar";
 
 const DevicePage: React.FC = () => {
 
@@ -55,26 +53,29 @@ const DevicePage: React.FC = () => {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [sortKey, setSortKey] = useState("");
   const [sortDirection, setSortDirection] = useState("asc");
-  const [menuDropDown, setMenuDropDown] = useState<HTMLElement | null>(null);
-  const isAdmin = profile.role === "admin";
   const isGuest = profile.role === "guest";
 
-  const userId = localStorage.getItem("userid");
-  const userName = profile.name || USER_NAME_NULL;
+  const hasToken = isAuthenticated;
+
+  let userName = profile.name;
+  if (!userName) {
+    if (hasToken && (profile.userid)) {
+      userName = profile.userid || "";
+    } else {
+      userName = USER_NAME_NULL;
+    }
+  }
   const photoSrc = toUploadsUrl(profile.photoUrl) || NO_PHOTO_URL;
-  const isRelogin = !profile.userid;
+  const isRelogin = !hasToken;
 
   // 장비 전체 목록 조회
   useEffect(() => {
     dispatch(fetchDevices());
-    if (isAuthenticated && userId) {
-      dispatch(fetchUserByUserid(userId));
-    }
-  }, [dispatch, isAuthenticated, userId]);
+  }, [dispatch]);
 
   // 뒤로 버튼 클릭
   const handleLogout = () => {
-    dispatch(logout());
+    dispatch(logoutUser());
     navigate("/");
   };
 
@@ -101,13 +102,6 @@ const DevicePage: React.FC = () => {
     setDeleteConfirmOpen(false);
   };
 
-  // 장비 사용자 등록 버튼 클릭
-  const handleRegisterClick = (device: any) => {
-    navigate("/devices/reg-dev-user", {
-      state: { device } 
-    });
-  };
-
   // 테이블 헤더 클릭 (레코드 정렬)
   const handleSort = (key: string) => {
     if (sortKey === key) {
@@ -127,9 +121,7 @@ const DevicePage: React.FC = () => {
     const getVal = (d: Device) => {
       switch (sortKey) {
         case 'catName' : return d.catName;
-        case 'userName' : return d.userName;
-        case 'startDate' : return d.startDate;
-        case 'endDate' : return d.endDate;
+        case 'purchaseDate' : return d.purchaseDate;
         default : return "";
       }
     }
@@ -146,7 +138,7 @@ const DevicePage: React.FC = () => {
       }
 
       // 날짜의 경우
-      if (sortKey === "startDate" || sortKey === "endDate") {
+      if (sortKey === "purchaseDate") {
         const at = new Date(av).getTime();
         const bt = new Date(bv).getTime();
         return sortDirection === "asc" ? at - bt : bt - at;
@@ -173,13 +165,10 @@ const DevicePage: React.FC = () => {
               <ArrowBackIosNewIcon />
             </IconButton>
           </Tooltip>
-          <Typography 
-            variant="h6" 
-            sx={{ flexGrow: 1, fontWeight: 700, cursor: isAdmin ? "pointer" : "default" }}
-            onClick={(e) => {if (isAdmin) setMenuDropDown(e.currentTarget)}}
-          >
-            장비 관리{isAdmin ? " ▼" : ""}
+          <Typography variant="h6" sx={{ fontWeight: 700 }}>
+            장비 관리
           </Typography>
+          <Box sx={{ flexGrow: 1 }} />
           <Box sx={{ display: "inline-flex", alignItems: "center", gap: 1.25 }}>
             <Avatar src={photoSrc} alt="profile" sx={{ width: 40, height: 40 }} />
             <Link
@@ -187,126 +176,112 @@ const DevicePage: React.FC = () => {
               to={isRelogin ? "/" : "/user-info"}
               underline="hover"
               sx={{ fontWeight: 600 }}
+              onClick={() => {
+                if (isRelogin) {
+                  handleLogout();
+                }
+              }}
             >
               {userName}
             </Link>
           </Box>
-          <Menu
-            anchorEl={menuDropDown}
-            open={Boolean(menuDropDown)}
-            onClose={() => setMenuDropDown(null)}
-          >
-            <MenuItem onClick={() => { setMenuDropDown(null); navigate("/devices"); }}>
-              장비 관리
-            </MenuItem>
-            <MenuItem onClick={() => { setMenuDropDown(null); navigate("/user-list"); }}>
-              사용자 관리
-            </MenuItem>
-          </Menu>
         </Toolbar>
       </AppBar>
-      {isRelogin ? <></> : (
-        <Container maxWidth="lg" sx={{ py: 3 }}>
-          <Paper
-            elevation={0}
-            sx={{
-              p: 2,
-              mb: 2,
-              borderRadius: 3,
-              border: (t) => `1px solid ${t.palette.divider}`,
-            }}
-          >
-            {isGuest ? (
-              <Typography variant="body2" color="warning">
-                {WARNING_GUEST}
-              </Typography> 
-            ) : (
-              <Stack direction="row" justifyContent="flex-end" alignItems="center">
-                <Box sx={{ display: "inline-flex", gap: 1 }}>
-                  <Button variant="contained" onClick={() => setOpen(true)}>장비등록</Button> 
-                </Box>
-              </Stack>
-            )}
-          </Paper>
-          <Paper
-            elevation={0}
-            sx={{
-              overflow: "hidden",
-              borderRadius: 3,
-              border: (t) => `1px solid ${t.palette.divider}`,
-            }}
-          >
-            <TableContainer sx={{ maxHeight: "calc(100vh - 240px)" }}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 700, width: 160 }}>일련번호</TableCell>
-                    <TableCell 
-                      sx={{ fontWeight: 700, width: 160, cursor: "pointer" }}
-                      onClick={() => handleSort("catName")}
-                    >
-                      분류{sortKey === "catName" ? (sortDirection === "asc" ? " ▲" : " ▼") : ""}
-                    </TableCell>
-                    <TableCell 
-                      sx={{ fontWeight: 700, width: 180, cursor: "pointer" }}
-                      onClick={() => handleSort("userName")}
-                    >
-                      사용자{sortKey === "userName" ? (sortDirection === "asc" ? " ▲" : " ▼") : ""}
-                    </TableCell>
-                    <TableCell 
-                      sx={{ fontWeight: 700, width: 140, cursor: "pointer" }}
-                      onClick={() => handleSort("startDate")}
-                    >
-                      시작일{sortKey === "startDate" ? (sortDirection === "asc" ? " ▲" : " ▼") : ""}
-                    </TableCell>
-                    <TableCell 
-                      sx={{ fontWeight: 700, width: 140, cursor: "pointer" }}
-                      onClick={() => handleSort("endDate")}
-                    >
-                      종료일{sortKey === "endDate" ? (sortDirection === "asc" ? " ▲" : " ▼") : ""}
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 700, minWidth: 220 }}></TableCell>
-                  </TableRow>
-                </TableHead>
-
-                <TableBody>
-                  {sortList.map((d: Device) => (
-                    <TableRow key={d.id}>
-                      <TableCell>{d.serialNumber}</TableCell>
-                      <TableCell>{d.catName}</TableCell>
-                      <TableCell>{d.userName ?? "-"}</TableCell>
-                      <TableCell>{d.startDate ?? "-"}</TableCell>
-                      <TableCell>{d.endDate ?? "-"}</TableCell>
-                      {isGuest ? <TableCell></TableCell> : (
-                        <TableCell>
-                          <Stack direction="row" spacing={1.2}>
-                            <Button
-                              size="small"
-                              variant="outlined"
-                              startIcon={<PersonAddAlt1Icon />}
-                              onClick={() => handleRegisterClick(d)}
-                            >
-                              사용자등록
-                            </Button>
-                            <Button
-                              size="small"
-                              color="error"
-                              variant="text"
-                              startIcon={<DeleteOutlineIcon />}
-                              onClick={() => handleDeleteClick(d.serialNumber)}
-                            >
-                              삭제
-                            </Button>
-                          </Stack>
-                        </TableCell>
-                      )}
+      {!isRelogin && (
+        <Box sx={{ display: "flex" }}>
+          <ManagementSidebar />
+          <Container maxWidth="lg" sx={{ py: 3 }}>
+            <Paper
+              elevation={0}
+              sx={{
+                p: 2,
+                mb: 2,
+                borderRadius: 3,
+                border: (t) => `1px solid ${t.palette.divider}`,
+              }}
+            >
+              {isGuest ? (
+                <Typography variant="body2" color="warning">
+                  {WARNING_GUEST}
+                </Typography> 
+              ) : (
+                <Stack direction="row" justifyContent="flex-end" alignItems="center">
+                  <Box sx={{ display: "inline-flex", gap: 1 }}>
+                    <Button variant="contained" onClick={() => setOpen(true)}>장비등록</Button> 
+                  </Box>
+                </Stack>
+              )}
+            </Paper>
+            <Paper
+              elevation={0}
+              sx={{
+                overflow: "hidden",
+                borderRadius: 3,
+                border: (t) => `1px solid ${t.palette.divider}`,
+              }}
+            >
+              <TableContainer sx={{ maxHeight: "calc(100vh - 240px)" }}>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: 700, width: 160 }}>일련번호</TableCell>
+                      <TableCell 
+                        sx={{ fontWeight: 700, width: 160, cursor: "pointer" }}
+                        onClick={() => handleSort("catName")}
+                      >
+                        분류{sortKey === "catName" ? (sortDirection === "asc" ? " ▲" : " ▼") : ""}
+                      </TableCell>
+                      <TableCell 
+                        sx={{ fontWeight: 700, width: 160 }}
+                      >
+                        장비명
+                      </TableCell>
+                      <TableCell 
+                        sx={{ fontWeight: 700, width: 160 }}
+                      >
+                        제조사
+                      </TableCell>
+                      <TableCell 
+                        sx={{ fontWeight: 700, width: 160, cursor: "pointer" }}
+                        onClick={() => handleSort("purchaseDate")}
+                      >
+                        구입일자{sortKey === "purchaseDate" ? (sortDirection === "asc" ? " ▲" : " ▼") : ""}
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: 700, width: 140 }}></TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Paper>
-        </Container>
+                  </TableHead>
+
+                  <TableBody>
+                    {sortList.map((d: Device) => (
+                      <TableRow key={d.id}>
+                        <TableCell>{d.serialNumber}</TableCell>
+                        <TableCell>{d.catName}</TableCell>
+                        <TableCell>{d.deviceName}</TableCell>
+                        <TableCell>{d.company ?? "-"}</TableCell>
+                        <TableCell>{d.purchaseDate}</TableCell>
+                        {isGuest ? <TableCell></TableCell> : (
+                          <TableCell>
+                            <Stack direction="row" spacing={1.2}>
+                              <Button
+                                size="small"
+                                color="error"
+                                variant="text"
+                                startIcon={<DeleteOutlineIcon />}
+                                onClick={() => handleDeleteClick(d.serialNumber)}
+                              >
+                                삭제
+                              </Button>
+                            </Stack>
+                          </TableCell>
+                        )}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Paper>
+          </Container>
+        </Box>
       )}
 
       <AddDeviceModal

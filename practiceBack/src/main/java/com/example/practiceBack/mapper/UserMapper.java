@@ -26,5 +26,6 @@ public interface UserMapper {
     // 사용자 권한 갱신
     void updateRole(User user);
 
+    // 리프레시 토큰 갱신
     void updateRefreshToken(@Param("userid") String userid, @Param("refreshToken") String refreshToken);
 }

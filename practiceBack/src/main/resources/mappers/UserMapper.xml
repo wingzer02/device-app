@@ -30,6 +30,7 @@
         u.password,
         u.email,
         u.photo_url,
+        u.refresh_token,
         u.role,
         r.role_name
         FROM user u
@@ -41,9 +42,11 @@
     <update id="updateUser" parameterType="com.example.practiceBack.dto.User">
         UPDATE user
         SET
-        password = #{password},
-        email = #{email},
-        photo_url = #{photoUrl}
+        photo_url = #{photoUrl},
+        email = #{email}
+        <if test="password != null">
+            ,password = #{password}
+        </if>
         WHERE userid = #{userid};
     </update>
 

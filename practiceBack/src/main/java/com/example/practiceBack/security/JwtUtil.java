@@ -1,6 +1,5 @@
 package com.example.practiceBack.security;
 
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -13,7 +12,7 @@ import java.util.Date;
 public class JwtUtil {
 
     private static final String SECRET_KEY = "my-super-secret-key-my-super-secret-key";
-    private static final long ACCESS_TOKEN_EXP = 1000 * 60 * 10; // 10분
+    private static final long ACCESS_TOKEN_EXP = 1000 * 60 * 10;
     private static final long REFRESH_TOKEN_EXP = 1000L * 60 * 60 * 24 * 7; // 7일
 
     private final Key key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
@@ -38,6 +37,7 @@ public class JwtUtil {
                 .compact();
     }
 
+    // 토큰에서 사용자 아이디 추출
     public String extractUserid(String token) {
         return Jwts.parserBuilder().setSigningKey(key).build()
                 .parseClaimsJws(token).getBody().getSubject();

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { useAppDispatch, useAppSelector } from "../hooks/useApp";
-import { loginUser } from "../store/userSlice";
+import React, { useState } from "react";
+import { useAppDispatch } from "../hooks/useApp";
+import { loginUser, checkAuth } from "../store/userSlice";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -13,21 +13,16 @@ import {
 
 const LoginPage: React.FC = () => {
   const [form, setForm] = useState({ userid: "", password: "" });
-  const { isAuthenticated } = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate("/devices");
-    } 
-  }, [isAuthenticated, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     try {
       e.preventDefault();
       await dispatch(loginUser(form)).unwrap();
-    } catch (error) {
+      await dispatch(checkAuth()).unwrap();
+      navigate("/assets")
+    } catch (error: any) {
       alert(error);
     }
   };

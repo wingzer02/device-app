@@ -34,7 +34,30 @@ const initialState: UserState = {
 };
 
 const API_BASE_URL = "http://localhost:8080/api/user";
-const ERR_MSG_USE_DIFFERENT_ID = " 다른 아이디를 사용해주세요.";
+const ERR_MSG_USE_DIFFERENT_ID = "존재하지 않는 사용자입니다. 다른 아이디를 사용해주세요.";
+const ERR_MSG_USE_DIFFERENT_PW = "잘못된 비밀번호입니다.";
+
+/**
+ * 현재 로그인 상태 체크
+ */
+export const checkAuth = createAsyncThunk(
+  "user/checkAuth",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await axios.get<User>(`${API_BASE_URL}/me`);
+      return res.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+
+        if (status === 401 || status === 403) {
+          return rejectWithValue("unauthorized");
+        }
+      }
+      return rejectWithValue("error");
+    }
+  }
+);
 
 /**
  * 회원가입
@@ -67,8 +90,7 @@ export const registerUser = createAsyncThunk(
       return res.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        const message = error.response?.data.message;
-        return rejectWithValue(message + ERR_MSG_USE_DIFFERENT_ID);
+        return rejectWithValue(ERR_MSG_USE_DIFFERENT_ID);
       } 
     }
   }
@@ -96,9 +118,25 @@ export const loginUser = createAsyncThunk(
       return res.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        const message = error.response?.data.message;
-        return rejectWithValue(message);
+        return rejectWithValue(ERR_MSG_USE_DIFFERENT_PW);
       } 
+    }
+  }
+);
+
+/**
+ * 로그아웃
+ */
+export const logoutUser = createAsyncThunk(
+  "user/logoutUser",
+  async (_, { rejectWithValue }) => {
+    try {
+      await axios.post(`${API_BASE_URL}/logout`);
+      return true;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue("로그아웃 실패");
+      }
     }
   }
 );
@@ -166,7 +204,7 @@ export const updateRole = createAsyncThunk(
     }
   ) => {
     const res = await axios.post(
-      `${API_BASE_URL}/updateRole`, {
+      `${API_BASE_URL}/update-role`, {
       userid,
       role
     });
@@ -179,9 +217,6 @@ const userSlice = createSlice({
   initialState,
   reducers: {
     logout: (state) => {
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
-      localStorage.removeItem("userid");
       state.isAuthenticated = false;
       state.profile = { 
         userid: "", 
@@ -198,12 +233,42 @@ const userSlice = createSlice({
   extraReducers: (builder) => {
     builder
       // 로그인
-      .addCase(loginUser.fulfilled, (state, action) => {
+      .addCase(loginUser.fulfilled, (state) => {
         state.isAuthenticated = true;
-        const userid = action.meta.arg.userid;
-        localStorage.setItem("userid", userid);
-        localStorage.setItem("accessToken", action.payload.accessToken);
-        localStorage.setItem("refreshToken", action.payload.refreshToken);
+      })
+
+      // 로그아웃
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.isAuthenticated = false;
+        state.profile = {
+          userid: "",
+          name: "",
+          email: "",
+          password: "",
+          photoUrl: "",
+          role: "",
+          roleName: "",
+          delFlg: false,
+        };
+      })
+
+      // 로그인 체크
+      .addCase(checkAuth.fulfilled, (state, action) => {
+        state.isAuthenticated = true;
+        state.profile = action.payload;
+      })
+      .addCase(checkAuth.rejected, (state) => {
+        state.isAuthenticated = false;
+        state.profile = {
+          userid: "",
+          name: "",
+          email: "",
+          password: "",
+          photoUrl: "",
+          role: "",
+          roleName: "",
+          delFlg: false,
+        };
       })
 
       // 사용자 전체 조회

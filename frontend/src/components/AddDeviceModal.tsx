@@ -31,6 +31,9 @@ const AddDeviceModal: React.FC<AddDeviceModalProps> = ({
   const [form, setForm] = useState({
     serialNumber: "",
     catId: "", 
+    deviceName: "",
+    company: "",
+    purchaseDate: "",
   });
 
   useEffect(() => {
@@ -42,7 +45,10 @@ const AddDeviceModal: React.FC<AddDeviceModalProps> = ({
     if (!open) {
       setForm({ 
         serialNumber: "", 
-        catId: "" 
+        catId: "",
+        deviceName: "",
+        company: "",
+        purchaseDate: "",
       });
     }
   }, [dispatch, open]);
@@ -53,6 +59,9 @@ const AddDeviceModal: React.FC<AddDeviceModalProps> = ({
     await dispatch(addDevice({
       serialNumber: form.serialNumber,
       catId: form.catId,
+      deviceName: form.deviceName,
+      company: form.company,
+      purchaseDate: form.purchaseDate,
     })).unwrap();
 
     alert("장비가 등록되었습니다.");
@@ -62,7 +71,10 @@ const AddDeviceModal: React.FC<AddDeviceModalProps> = ({
     // 등록이 완료되면 입력항목 초기화
     setForm({ 
       serialNumber: "", 
-      catId: "" 
+      catId: "",
+      deviceName: "",
+      company: "",
+      purchaseDate: "",
     });
   }
 
@@ -71,7 +83,10 @@ const AddDeviceModal: React.FC<AddDeviceModalProps> = ({
     // 취소 버튼을 누르면 입력항목 초기화
     setForm({ 
       serialNumber: "", 
-      catId: "" 
+      catId: "",
+      deviceName: "",
+      company: "",
+      purchaseDate: "",
     });
   };
   
@@ -109,6 +124,33 @@ const AddDeviceModal: React.FC<AddDeviceModalProps> = ({
               </MenuItem>
             ))}
           </TextField>
+          <TextField
+            label="장비명"
+            variant="outlined"
+            required
+            value={form.deviceName}
+            onChange={(e) =>
+              setForm({ ...form, deviceName: e.target.value })
+            }
+          />
+          <TextField
+            label="제조사"
+            variant="outlined"
+            value={form.company}
+            onChange={(e) =>
+              setForm({ ...form, company: e.target.value })
+            }
+          />
+          <TextField
+            label="구입일"
+            type="date"
+            value={form.purchaseDate}
+            onChange={(e) =>
+              setForm({ ...form, purchaseDate: e.target.value })
+            }
+            InputLabelProps={{ shrink: true }}
+            required
+          />
           <DialogActions sx={{ px: 0 }}>
             <Button type="submit" variant="contained">
               등록

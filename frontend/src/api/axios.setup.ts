@@ -1,59 +1,45 @@
 import axios from "axios";
+import { store } from "../store";
 import { logout } from "../store/userSlice";
+
+axios.defaults.withCredentials = true;
 
 axios.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("accessToken");
-    config.headers.Authorization = `Bearer ${token}`;
-
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 axios.interceptors.response.use(
-  (response) => {
-    return response;
-  },
-
+  (response) => response,
   async (error) => {
     const originalConfig = error.config;
-    if (error.response.status === 401) {
+    const isReissue = originalConfig?.url?.includes('/api/user/reissue');
+    if ((error.response?.status === 401 
+      || error.response?.status === 403) 
+      && !originalConfig._retry 
+      && !isReissue) {
+      originalConfig._retry = true;
+
       try {
-        console.log("roatate token");
-        const refreshToken = localStorage.getItem("refreshToken");
-        if (!refreshToken) {
-          throw new Error("Refresh token not available.");
-        }
-        const res = await axios.create().post(
-          "/api/user/reissue",
+        await axios.create().post(
+          "http://localhost:8080/api/user/reissue",
           {},
-          {
-            baseURL: "http://localhost:8080",
-            headers: {
-              Authorization: `Bearer ${refreshToken}`,
-              "Content-type": "application/json",
-            },
-          }
+          { withCredentials: true }          
         );
 
-        const newAccessToken = res.data.accessToken.newAccessToken;
-        if (newAccessToken) {
-          localStorage.setItem("accessToken", newAccessToken);
-          originalConfig.headers.Authorization = `Bearer ${newAccessToken}`;
-          return axios(originalConfig);
-        }
+        return axios({
+          ...originalConfig,
+          withCredentials: true,
+        })
       } catch (refreshError) {
-        console.error(refreshError);
-        localStorage.clear();
-        logout();
+        store.dispatch(logout());
         return Promise.reject(refreshError);
       }
     }
 
-    localStorage.clear();
+    store.dispatch(logout());
     return Promise.reject(error);
   }
 );

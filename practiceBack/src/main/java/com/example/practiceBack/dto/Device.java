@@ -10,8 +10,7 @@ public class Device {
     private String serialNumber;
     private Integer catId;
     private String catName;
-    private String userid;
-    private String userName;
-    private LocalDate startDate;
-    private LocalDate endDate;
+    private String deviceName;
+    private String company;
+    private LocalDate purchaseDate;
 }

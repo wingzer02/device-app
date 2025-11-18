@@ -27,11 +27,6 @@ public class DeviceService {
         deviceMapper.insertDevice(device);
     }
 
-    // 장비 사용자 DB 등록
-    public void registerDeviceUser(Device device) {
-        deviceMapper.updateDeviceUser(device);
-    }
-
     // 장비 DB 삭제
     public void deleteDeviceBySerial(String serialNumber) {
         deviceMapper.deleteBySerialNumber(serialNumber);

@@ -27,12 +27,6 @@ public class DeviceController {
         deviceService.addDevice(device);
     }
 
-    // 장비 사용자 등록
-    @PostMapping("/registerDeviceUser")
-    public void registerDeviceUser(@RequestBody Device device) {
-        deviceService.registerDeviceUser(device);
-    }
-
     // 장비 삭제
     @DeleteMapping("/{serialNumber}")
     public void deleteDevice(@PathVariable String serialNumber) {

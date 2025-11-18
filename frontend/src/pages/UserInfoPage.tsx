@@ -30,9 +30,12 @@ const UserInfoPage: React.FC = () => {
 
   useEffect(() => {
     dispatch(fetchUserByUserid(profile.userid));
-    setPassword(profile.password);
+  }, [dispatch, profile.userid]);
+
+  useEffect(() => {
     setEmail(profile.email);
-  }, [dispatch, profile.userid, profile.password, profile.email]);
+    setPassword("");
+  }, [profile.email]);
 
   const handleImgChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -50,14 +53,14 @@ const UserInfoPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const dto = {
+    const params = {
       email,
       password,
       photoUrl: profile.photoUrl,
     };
 
     const fd = new FormData();
-    fd.append("user", new Blob([JSON.stringify(dto)], { type: "application/json" }));
+    fd.append("user", new Blob([JSON.stringify(params)], { type: "application/json" }));
     // 새 파일을 선택했을 때만 file 추가
     if (file) {
       fd.append("file", file);

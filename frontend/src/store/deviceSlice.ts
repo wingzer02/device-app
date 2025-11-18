@@ -6,10 +6,9 @@ export interface Device {
   serialNumber: string;
   catId?: string;
   catName?: string;
-  userid?: string;
-  userName?: string;
-  startDate?: string;
-  endDate?: string;
+  deviceName?: string;
+  company?: string;
+  purchaseDate?: string;
 }
 
 interface DeviceState {
@@ -51,20 +50,6 @@ export const deleteDevice = createAsyncThunk(
   "device/deleteDevice",
   async (serialNumber: string) => {
     const res = await axios.delete(`${API_BASE_URL}/${serialNumber}`);
-    return res.data;
-  }
-);
-
-/**
- * 장비 사용자 등록
- */
-export const registerDeviceUser = createAsyncThunk(
-  "device/registerDeviceUser",
-  async (device: Device) => {
-    const res = await axios.post(
-      `${API_BASE_URL}/registerDeviceUser`,
-      device
-    );
     return res.data;
   }
 );

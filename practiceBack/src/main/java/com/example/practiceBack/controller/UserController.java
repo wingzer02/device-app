@@ -3,6 +3,12 @@ package com.example.practiceBack.controller;
 import com.example.practiceBack.dto.User;
 import com.example.practiceBack.dto.LoginRequest;
 import com.example.practiceBack.service.UserService;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -32,8 +38,53 @@ public class UserController {
 
     // 로그인
     @PostMapping("/login")
-    public Map<String, String> login(@RequestBody LoginRequest req) {
-        return userService.login(req);
+    public ResponseEntity<Void> login(
+            @RequestBody LoginRequest req,
+            HttpServletResponse response
+    ) {
+        Map<String, String> tokens = userService.login(req);
+        String accessToken = tokens.get("accessToken");
+        String refreshToken = tokens.get("refreshToken");
+
+        // access token 쿠키
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
+                .httpOnly(true)
+                .path("/")
+                .maxAge(10 * 60)
+                .build();
+
+        // refresh token 쿠키
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
+                .httpOnly(true)
+                .path("/")
+                .maxAge(7 * 24 * 60 * 60)
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+
+        return ResponseEntity.ok().build();
+    }
+
+    // 로그아웃
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletResponse response) {
+        ResponseCookie deleteAccess = ResponseCookie.from("accessToken", "")
+                .httpOnly(true)
+                .path("/")
+                .maxAge(0)
+                .build();
+
+        ResponseCookie deleteRefresh = ResponseCookie.from("refreshToken", "")
+                .httpOnly(true)
+                .path("/")
+                .maxAge(0)
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, deleteAccess.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, deleteRefresh.toString());
+
+        return ResponseEntity.ok().build();
     }
 
     // 사용자 정보 조회
@@ -65,15 +116,48 @@ public class UserController {
     }
 
     // 사용자 권한 갱신
-    @PostMapping("/updateRole")
+    @PostMapping("/update-role")
     public void updateRole(@RequestBody User user) {
         userService.updateRole(user);
     }
 
-    // 토큰 재발급 (미완성_테스트중)
+    // 토큰 재발급
     @PostMapping("/reissue")
-    public Map<String, String> reissue(@RequestBody Map<String, String> body) {
-        String refreshToken = body.get("refreshToken");
-        return userService.reissueTokens(refreshToken);
+    public ResponseEntity<Void> reissue(
+            @CookieValue("refreshToken") String refreshToken,
+            HttpServletResponse response
+    ) {
+        Map<String, String> tokens = userService.reissueTokens(refreshToken);
+
+        String newAccess = tokens.get("accessToken");
+        String newRefresh = tokens.get("refreshToken");
+
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", newAccess)
+                .httpOnly(true)
+                .path("/")
+                .maxAge(10 * 60)
+                .sameSite("Lax")
+                .build();
+
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", newRefresh)
+                .httpOnly(true)
+                .path("/")
+                .maxAge(7 * 24 * 60 * 60)
+                .sameSite("Lax")
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<User> me(@AuthenticationPrincipal User user) {
+        if (user == null) {
+            // JWT 없거나, 만료/무효이면 401
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return ResponseEntity.ok(user);
     }
 }

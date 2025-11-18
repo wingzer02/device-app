@@ -3,6 +3,7 @@ import userReducer from "./userSlice";
 import deviceReducer from "./deviceSlice";
 import categoryReducer from "./categorySlice";
 import roleReducer from "./roleSlice";
+import assetReducer from "./assetSlice"
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     device: deviceReducer,
     category: categoryReducer,
     role: roleReducer,
+    asset: assetReducer,
   }
 });
 

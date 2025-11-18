@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 import { 
   AppBar,
   Toolbar,
-  Typography,
   Box,
   Container,
   Paper,
@@ -19,12 +18,12 @@ import {
   TableContainer,
   Stack,
   Tooltip,
-  Menu,
-  MenuItem,
-  TextField
+  TextField,
+  Typography
  } from "@mui/material";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import UpdateRoleModal from "../components/UpdateRoleModal";
+import ManagementSidebar from "../components/ManagementSidebar";
 
 const UserListPage: React.FC = () => {
 
@@ -32,7 +31,6 @@ const UserListPage: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const [menuDropDown, setMenuDropDown] = useState<HTMLElement | null>(null);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [open, setOpen] = useState(false);
   const [searchName, setSearchName] = useState("");
@@ -75,127 +73,114 @@ const UserListPage: React.FC = () => {
               <ArrowBackIosNewIcon />
             </IconButton>
           </Tooltip>
-          <Typography 
-            variant="h6" 
-            sx={{ flexGrow: 1, fontWeight: 700, cursor: "pointer" }}
-            onClick={(e) => setMenuDropDown(e.currentTarget)}
-          >
-            사용자 관리 ▼
+          <Typography variant="h6" sx={{ fontWeight: 700 }}>
+            사용자 관리
           </Typography>
-          <Menu
-            anchorEl={menuDropDown}
-            open={Boolean(menuDropDown)}
-            onClose={() => setMenuDropDown(null)}
-          >
-            <MenuItem onClick={() => { setMenuDropDown(null); navigate("/devices"); }}>
-              장비 관리
-            </MenuItem>
-            <MenuItem onClick={() => { setMenuDropDown(null); navigate("/user-list"); }}>
-              사용자 관리
-            </MenuItem>
-          </Menu>
+          <Box sx={{ flexGrow: 1 }} />
         </Toolbar>
       </AppBar>
 
-      <Container maxWidth="lg" sx={{ py: 3 }}>
-        <Paper
-          elevation={0}
-          sx={{
-            overflow: "hidden",
-            borderRadius: 3,
-            border: (t) => `1px solid ${t.palette.divider}`,
-          }}
-        >
-          <Box sx={{ p: 2, display: "flex", justifyContent: "center" }}>
-            <TextField
-              size="small"
-              label="이름 검색"
-              value={searchName}
-              onChange={(e) => setSearchName(e.target.value)}
-            />
-          </Box>
-          <TableContainer sx={{ maxHeight: "calc(100vh - 240px)" }}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell 
-                    sx={{ fontWeight: 700, width: 160 }}
-                  >
-                    아이디
-                  </TableCell>
-                  <TableCell 
-                    sx={{ fontWeight: 700, width: 160 }}
-                  >
-                    이름
-                  </TableCell>
-                  <TableCell 
-                    sx={{ fontWeight: 700, width: 300 }}
-                  >
-                    이메일
-                  </TableCell>
-                  <TableCell 
-                    sx={{ fontWeight: 700, width: 120 }}
-                  >
-                    권한
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: 700, minWidth: 220 }}></TableCell>
-                </TableRow>
-              </TableHead>
-
-              <TableBody>
-                {filteredList.length === 0 ? (
+      <Box sx={{ display: "flex" }}>
+        <ManagementSidebar />
+        <Container maxWidth="lg" sx={{ py: 3 }}>
+          <Paper
+            elevation={0}
+            sx={{
+              overflow: "hidden",
+              borderRadius: 3,
+              border: (t) => `1px solid ${t.palette.divider}`,
+            }}
+          >
+            <Box sx={{ p: 2, display: "flex", justifyContent: "center" }}>
+              <TextField
+                size="small"
+                label="이름 검색"
+                value={searchName}
+                onChange={(e) => setSearchName(e.target.value)}
+              />
+            </Box>
+            <TableContainer sx={{ maxHeight: "calc(100vh - 240px)" }}>
+              <Table>
+                <TableHead>
                   <TableRow>
-                    <TableCell colSpan={5} align="center">
-                      검색 결과가 없습니다.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredList.map((u: User) => (
-                    <TableRow 
-                      key={u.userid}
-                      hover
-                      sx={
-                        u.delFlg
-                        ? (t) => ({
-                          backgroundColor: t.palette.action.hover,
-                          "& .MuiTableCell-root": { color: t.palette.text.disabled },
-                        }) : null
-                      }
+                    <TableCell 
+                      sx={{ fontWeight: 700, width: 160 }}
                     >
-                      <TableCell>{u.userid}</TableCell>
-                      <TableCell>{u.name}</TableCell>
-                      <TableCell>{u.email}</TableCell>
-                      <TableCell>{u.roleName}</TableCell>
-                      <TableCell>
-                        {u.delFlg ? null :(
-                          <Stack direction="row" spacing={1.2}>
-                            <Button
-                              size="small"
-                              variant="text"
-                              onClick={() => handleOpenUpdateRole(u)}
-                            >
-                              권한변경
-                            </Button>
-                            <Button
-                              size="small"
-                              color="error"
-                              variant="text"
-                              onClick={() => handleDeleteClick(u.userid)}
-                            >
-                              회원탈퇴
-                            </Button>
-                          </Stack>
-                        )}
+                      아이디
+                    </TableCell>
+                    <TableCell 
+                      sx={{ fontWeight: 700, width: 160 }}
+                    >
+                      이름
+                    </TableCell>
+                    <TableCell 
+                      sx={{ fontWeight: 700, width: 300 }}
+                    >
+                      이메일
+                    </TableCell>
+                    <TableCell 
+                      sx={{ fontWeight: 700, width: 120 }}
+                    >
+                      권한
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 700, minWidth: 220 }}></TableCell>
+                  </TableRow>
+                </TableHead>
+
+                <TableBody>
+                  {filteredList.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} align="center">
+                        검색 결과가 없습니다.
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Paper>
-      </Container>
-
+                  ) : (
+                    filteredList.map((u: User) => (
+                      <TableRow 
+                        key={u.userid}
+                        hover
+                        sx={
+                          u.delFlg
+                          ? (t) => ({
+                            backgroundColor: t.palette.action.hover,
+                            "& .MuiTableCell-root": { color: t.palette.text.disabled },
+                          }) : null
+                        }
+                      >
+                        <TableCell>{u.userid}</TableCell>
+                        <TableCell>{u.name}</TableCell>
+                        <TableCell>{u.email}</TableCell>
+                        <TableCell>{u.roleName}</TableCell>
+                        <TableCell>
+                          {u.delFlg ? null :(
+                            <Stack direction="row" spacing={1.2}>
+                              <Button
+                                size="small"
+                                variant="text"
+                                onClick={() => handleOpenUpdateRole(u)}
+                              >
+                                권한변경
+                              </Button>
+                              <Button
+                                size="small"
+                                color="error"
+                                variant="text"
+                                onClick={() => handleDeleteClick(u.userid)}
+                              >
+                                회원탈퇴
+                              </Button>
+                            </Stack>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Paper>
+        </Container>
+      </Box>
       {selectedUser ? (
         <UpdateRoleModal
           open={open}
