@@ -28,4 +28,10 @@
         WHERE serial_number = #{serialNumber};
     </delete>
 
+    <select id="findCatIdBySerialNumber" parameterType="string" resultType="int">
+        SELECT
+        cat_id
+        FROM device
+        WHERE serial_number = #{serialNumber};
+    </select>
 </mapper>

@@ -8,6 +8,8 @@ import UserListPage from "./pages/UserListPage";
 import AssetPage from "./pages/AssetPage";
 import AssetRegisterPage from "./pages/AssetRegisterPage";
 import AssetEditPage from "./pages/AssetEditPage";
+import LogPage from "./pages/LogPage";
+import LogEditPage from "./pages/LogEditPage";
 import { useAppDispatch } from "./hooks/useApp";
 import { checkAuth } from "./store/userSlice";
 
@@ -29,6 +31,8 @@ function App() {
         <Route path="/assets" element={<AssetPage />} />
         <Route path="/assets/register" element={<AssetRegisterPage />} />
         <Route path="/assets/:assetSerialNumber/edit" element={<AssetEditPage />} />
+        <Route path="/logs" element={<LogPage />} />
+        <Route path="/logs/:assetSerialNumber/edit" element={<LogEditPage />} />
       </Routes>
     </BrowserRouter>
   );

@@ -15,12 +15,15 @@ export interface User {
 interface UserState {
   isAuthenticated: boolean;
   list: User[];
+  listAdminPage: User[];
   profile: User;
+  status: string;
 }
 
 const initialState: UserState = {
   isAuthenticated: false,
   list: [],
+  listAdminPage: [],
   profile: {
     userid: "",
     name: "",
@@ -31,11 +34,10 @@ const initialState: UserState = {
     roleName: "",
     delFlg: false,
   },
+  status: "none",
 };
 
 const API_BASE_URL = "http://localhost:8080/api/user";
-const ERR_MSG_USE_DIFFERENT_ID = "존재하지 않는 사용자입니다. 다른 아이디를 사용해주세요.";
-const ERR_MSG_USE_DIFFERENT_PW = "잘못된 비밀번호입니다.";
 
 /**
  * 현재 로그인 상태 체크
@@ -90,7 +92,8 @@ export const registerUser = createAsyncThunk(
       return res.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        return rejectWithValue(ERR_MSG_USE_DIFFERENT_ID);
+        const message = error.response?.data?.message;
+        return rejectWithValue(message);
       } 
     }
   }
@@ -118,7 +121,8 @@ export const loginUser = createAsyncThunk(
       return res.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        return rejectWithValue(ERR_MSG_USE_DIFFERENT_PW);
+        const message = error.response?.data?.message;
+        return rejectWithValue(message);
       } 
     }
   }
@@ -148,6 +152,14 @@ export const fetchAllUsers = createAsyncThunk(
   "user/fetchAll", 
   async () => {
     const res = await axios.get<User[]>(API_BASE_URL);
+    return res.data;
+  }
+);
+
+export const fetchAllUsersAdminPage = createAsyncThunk(
+  "user/fetchAllUsersAdminPage", 
+  async () => {
+    const res = await axios.get<User[]>(`${API_BASE_URL}/admin`);
     return res.data;
   }
 );
@@ -218,16 +230,17 @@ const userSlice = createSlice({
   reducers: {
     logout: (state) => {
       state.isAuthenticated = false;
-      state.profile = { 
-        userid: "", 
-        name: "", 
-        email: "", 
-        password: "", 
-        photoUrl: "", 
-        role: "", 
+      state.profile = {
+        userid: "",
+        name: "",
+        email: "",
+        password: "",
+        photoUrl: "",
+        role: "",
         roleName: "",
         delFlg: false,
       };
+      state.status = "none";
     },
   },
   extraReducers: (builder) => {
@@ -254,10 +267,15 @@ const userSlice = createSlice({
 
       // 로그인 체크
       .addCase(checkAuth.fulfilled, (state, action) => {
+        state.status = "succeeded";
         state.isAuthenticated = true;
         state.profile = action.payload;
       })
+      .addCase(checkAuth.pending, (state) => {
+        state.status = "loading";
+      })
       .addCase(checkAuth.rejected, (state) => {
+        state.status = "failed";
         state.isAuthenticated = false;
         state.profile = {
           userid: "",
@@ -277,6 +295,13 @@ const userSlice = createSlice({
       })
       .addCase(fetchAllUsers.rejected, (state) => {
         state.list = [];
+      })
+
+      .addCase(fetchAllUsersAdminPage.fulfilled, (state, action) => {
+        state.listAdminPage = action.payload;
+      })
+      .addCase(fetchAllUsersAdminPage.rejected, (state) => {
+        state.listAdminPage = [];
       })
 
       .addCase(fetchUserByUserid.fulfilled, (state, action) => {

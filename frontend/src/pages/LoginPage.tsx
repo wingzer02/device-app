@@ -22,7 +22,7 @@ const LoginPage: React.FC = () => {
       await dispatch(loginUser(form)).unwrap();
       await dispatch(checkAuth()).unwrap();
       navigate("/assets")
-    } catch (error: any) {
+    } catch (error) {
       alert(error);
     }
   };

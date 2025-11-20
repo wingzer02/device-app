@@ -3,16 +3,13 @@ import AddDeviceModal from "../components/AddDeviceModal";
 import { useAppDispatch, useAppSelector } from "../hooks/useApp";
 import { deleteDevice, Device, fetchDevices } from "../store/deviceSlice";
 import { logoutUser  } from "../store/userSlice";
-import { useNavigate, Link as RouterLink } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { 
-  AppBar,
-  Toolbar,
   Typography,
   Box,
   Container,
   Paper,
   Button,
-  IconButton,
   Table,
   TableHead,
   TableBody,
@@ -24,21 +21,17 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Tooltip,
-  Link,
-  Avatar,
+  Pagination,
  } from "@mui/material";
-import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { toUploadsUrl } from "../utils/url"; 
 import { 
   USER_NAME_NULL,
   NO_PHOTO_URL,
-  DELETE_DEVICE_OK,
-  TOOLTIP_LOGOUT,
   WARNING_GUEST,
 } from "../utils/text";
-import ManagementSidebar from "../components/ManagementSidebar";
+import CommonSidebar from "../components/CommonSidebar";
+import CommonHeader from "../components/CommonHeader";
 
 const DevicePage: React.FC = () => {
 
@@ -53,25 +46,24 @@ const DevicePage: React.FC = () => {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [sortKey, setSortKey] = useState("");
   const [sortDirection, setSortDirection] = useState("asc");
+  const [page, setPage] = useState(1);
+  const rowsPerPage = 10;
   const isGuest = profile.role === "guest";
 
-  const hasToken = isAuthenticated;
-
-  let userName = profile.name;
-  if (!userName) {
-    if (hasToken && (profile.userid)) {
-      userName = profile.userid || "";
-    } else {
-      userName = USER_NAME_NULL;
-    }
-  }
+  const userName = profile.name ? profile.name : USER_NAME_NULL;
   const photoSrc = toUploadsUrl(profile.photoUrl) || NO_PHOTO_URL;
-  const isRelogin = !hasToken;
 
   // 장비 전체 목록 조회
   useEffect(() => {
     dispatch(fetchDevices());
   }, [dispatch]);
+
+  useEffect(() => {
+    const lastPage = Math.max(1, Math.ceil(list.length / rowsPerPage));
+    if (page > lastPage) {
+      setPage(lastPage);
+    }
+  }, [list.length, page, rowsPerPage])
 
   // 뒤로 버튼 클릭
   const handleLogout = () => {
@@ -87,12 +79,13 @@ const DevicePage: React.FC = () => {
 
   // 장비 삭제 모달 - 확인 버튼 클릭
   const handleDeleteConfirm = async () => {
-    if (deleteTarget) {
+    try {
       await dispatch(deleteDevice(deleteTarget));
-      alert(DELETE_DEVICE_OK);
       setDeleteTarget("");
       setDeleteConfirmOpen(false);
       dispatch(fetchDevices());
+    } catch (error) {
+      alert(error);
     }
   };
 
@@ -114,6 +107,7 @@ const DevicePage: React.FC = () => {
       setSortKey(key);
       setSortDirection("asc");
     }
+    setPage(1);
   };
 
   const sortList = useMemo(() => {
@@ -156,40 +150,32 @@ const DevicePage: React.FC = () => {
     return arr;
   }, [list, sortKey, sortDirection]);
 
+  const pageCount = Math.max(1, Math.ceil(sortList.length / rowsPerPage));
+
+  const handleChangePage = (_event: unknown, value: number) => {
+    setPage(value);
+  };
+
+  const pagedDevices = useMemo(
+    () => sortList.slice(
+      (page - 1) * rowsPerPage,
+      (page - 1) * rowsPerPage + rowsPerPage
+    ),
+    [sortList, page, rowsPerPage]
+  );
+
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
-      <AppBar position="static" color="default" elevation={0}>
-        <Toolbar sx={{ gap: 1 }}>
-          <Tooltip title={TOOLTIP_LOGOUT}>
-            <IconButton edge="start" onClick={handleLogout}>
-              <ArrowBackIosNewIcon />
-            </IconButton>
-          </Tooltip>
-          <Typography variant="h6" sx={{ fontWeight: 700 }}>
-            장비 관리
-          </Typography>
-          <Box sx={{ flexGrow: 1 }} />
-          <Box sx={{ display: "inline-flex", alignItems: "center", gap: 1.25 }}>
-            <Avatar src={photoSrc} alt="profile" sx={{ width: 40, height: 40 }} />
-            <Link
-              component={RouterLink}
-              to={isRelogin ? "/" : "/user-info"}
-              underline="hover"
-              sx={{ fontWeight: 600 }}
-              onClick={() => {
-                if (isRelogin) {
-                  handleLogout();
-                }
-              }}
-            >
-              {userName}
-            </Link>
-          </Box>
-        </Toolbar>
-      </AppBar>
-      {!isRelogin && (
+      <CommonHeader
+        title="장비 관리"
+        userName={userName}
+        photoSrc={photoSrc}
+        onLogout={handleLogout}
+        isAuthenticated={isAuthenticated}
+      />
+      {isAuthenticated && (
         <Box sx={{ display: "flex" }}>
-          <ManagementSidebar />
+          <CommonSidebar />
           <Container maxWidth="lg" sx={{ py: 3 }}>
             <Paper
               elevation={0}
@@ -220,7 +206,7 @@ const DevicePage: React.FC = () => {
                 border: (t) => `1px solid ${t.palette.divider}`,
               }}
             >
-              <TableContainer sx={{ maxHeight: "calc(100vh - 240px)" }}>
+              <TableContainer>
                 <Table>
                   <TableHead>
                     <TableRow>
@@ -252,13 +238,13 @@ const DevicePage: React.FC = () => {
                   </TableHead>
 
                   <TableBody>
-                    {sortList.map((d: Device) => (
+                    {pagedDevices.map((d: Device) => (
                       <TableRow key={d.id}>
                         <TableCell>{d.serialNumber}</TableCell>
                         <TableCell>{d.catName}</TableCell>
                         <TableCell>{d.deviceName}</TableCell>
                         <TableCell>{d.company ?? "-"}</TableCell>
-                        <TableCell>{d.purchaseDate}</TableCell>
+                        <TableCell>{d.purchaseDate ?? "-"}</TableCell>
                         {isGuest ? <TableCell></TableCell> : (
                           <TableCell>
                             <Stack direction="row" spacing={1.2}>
@@ -279,6 +265,17 @@ const DevicePage: React.FC = () => {
                   </TableBody>
                 </Table>
               </TableContainer>
+              <Box sx={{ display: "flex", justifyContent: "center", py: 2 }}>
+                <Pagination
+                  count={pageCount}
+                  page={page}
+                  onChange={handleChangePage}
+                  color="primary"
+                  shape="rounded"
+                  showFirstButton
+                  showLastButton
+                />
+              </Box>
             </Paper>
           </Container>
         </Box>

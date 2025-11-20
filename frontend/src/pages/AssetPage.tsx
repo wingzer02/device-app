@@ -1,16 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, Link as RouterLink } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../hooks/useApp";
-import { fetchAssets, deleteAsset } from "../store/assetSlice";
+import { fetchAssets, deleteAsset, Asset } from "../store/assetSlice";
 import { logoutUser } from "../store/userSlice";
+import { fetchDevices } from "../store/deviceSlice";
+import { fetchLogByAssetSerialNumber } from "../store/logSlice";
 import {
-  AppBar,
-  Toolbar,
   Box,
   Container,
   Paper,
   Button,
-  IconButton,
   Table,
   TableHead,
   TableRow,
@@ -18,52 +17,54 @@ import {
   TableBody,
   TableContainer,
   Stack,
-  Tooltip,
-  Link,
-  Avatar,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
+  Pagination,
   Typography,
 } from "@mui/material";
-import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { toUploadsUrl } from "../utils/url";
 import {
   USER_NAME_NULL,
   NO_PHOTO_URL,
-  TOOLTIP_LOGOUT,
 } from "../utils/text";
-import ManagementSidebar from "../components/ManagementSidebar";
+import CommonSidebar from "../components/CommonSidebar";
+import CommonHeader from "../components/CommonHeader";
 
 const AssetPage: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
   const { list: assets } = useAppSelector((s) => s.asset);
+  const { list: devices } = useAppSelector((s) => s.device);
+  const { log } = useAppSelector((s) => s.log);
   const { isAuthenticated, profile } = useAppSelector((s) => s.user);
 
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [page, setPage] = useState(1);
+  const rowsPerPage = 10;
+  const pageCount = Math.max(1, Math.ceil(assets.length / rowsPerPage));
 
-  const hasToken = isAuthenticated;
+  const [logModalOpen, setLogModalOpen] = useState(false);
 
-  let userName = profile.name;
-  if (!userName) {
-    if (hasToken && profile.userid) {
-      userName = profile.userid || "";
-    } else {
-      userName = USER_NAME_NULL;
-    }
-  }
+  const userName = profile.name ? profile.name : USER_NAME_NULL;
   const photoSrc = toUploadsUrl(profile.photoUrl) || NO_PHOTO_URL;
-  const isRelogin = !hasToken;
 
   useEffect(() => {
     dispatch(fetchAssets());
+    dispatch(fetchDevices());
   }, [dispatch]);
+
+  useEffect(() => {
+    const lastPage = Math.max(1, Math.ceil(assets.length / rowsPerPage));
+    if (page > lastPage) {
+      setPage(lastPage);
+    }
+  }, [assets.length, page, rowsPerPage])
 
   // 뒤로 버튼 클릭
   const handleLogout = () => {
@@ -94,41 +95,32 @@ const AssetPage: React.FC = () => {
     setDeleteConfirmOpen(false);
   };
 
+  const handleSerialNumberClick = (asset: Asset) => {
+    dispatch(fetchLogByAssetSerialNumber(asset.assetSerialNumber));
+    setLogModalOpen(true);    
+  }
+
+  const handleChangePage = (_event: unknown, value: number) => {
+    setPage(value);
+  };
+
+  const pagedAssets = assets.slice(
+    (page - 1) * rowsPerPage,
+    (page - 1) * rowsPerPage + rowsPerPage
+  );
+
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
-      <AppBar position="static" color="default" elevation={0}>
-        <Toolbar sx={{ gap: 1 }}>
-          <Tooltip title={TOOLTIP_LOGOUT}>
-            <IconButton edge="start" onClick={handleLogout}>
-              <ArrowBackIosNewIcon />
-            </IconButton>
-          </Tooltip>
-          <Typography variant="h6" sx={{ fontWeight: 700 }}>
-            자산 관리
-          </Typography>
-          <Box sx={{ flexGrow: 1 }} />
-          <Box sx={{ display: "inline-flex", alignItems: "center", gap: 1.25 }}>
-            <Avatar src={photoSrc} alt="profile" sx={{ width: 40, height: 40 }} />
-            <Link
-              component={RouterLink}
-              to={isRelogin ? "/" : "/user-info"}
-              underline="hover"
-              sx={{ fontWeight: 600 }}
-              onClick={() => {
-                if (isRelogin) {
-                  handleLogout();
-                }
-              }}
-            >
-              {userName}
-            </Link>
-          </Box>
-        </Toolbar>
-      </AppBar>
-
-      {!isRelogin && (
+      <CommonHeader
+        title="자산 관리"
+        userName={userName}
+        photoSrc={photoSrc}
+        onLogout={handleLogout}
+        isAuthenticated={isAuthenticated}
+      />
+      {isAuthenticated && (
         <Box sx={{ display: "flex" }}>
-          <ManagementSidebar />
+          <CommonSidebar />
           <Container maxWidth="lg" sx={{ py: 3 }}>
             <Paper
               elevation={0}
@@ -156,58 +148,116 @@ const AssetPage: React.FC = () => {
                 border: (t) => `1px solid ${t.palette.divider}`,
               }}
             >
-              <TableContainer sx={{ maxHeight: "calc(100vh - 240px)" }}>
+              <TableContainer>
                 <Table>
                   <TableHead>
                     <TableRow>
                       <TableCell sx={{ fontWeight: 700 }}>관리코드</TableCell>
                       <TableCell sx={{ fontWeight: 700 }}>자산명</TableCell>
                       <TableCell sx={{ fontWeight: 700 }}>설치장소</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>사용자명</TableCell>
                       <TableCell sx={{ fontWeight: 700 }}>장비일련번호</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>장비명</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>사용자명</TableCell>
                       <TableCell sx={{ fontWeight: 700 }}>사용시작일</TableCell>
                       <TableCell sx={{ fontWeight: 700 }}>사용종료일</TableCell>
                       <TableCell sx={{ fontWeight: 700, width: 220 }}>관리</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {assets.map((a) => (
-                      <TableRow key={a.assetSerialNumber}>
-                        <TableCell>{a.assetSerialNumber}</TableCell>
-                        <TableCell>{a.assetName}</TableCell>
-                        <TableCell>{a.location}</TableCell>
-                        <TableCell>{a.userName}</TableCell>
-                        <TableCell>{a.deviceSerialNumber}</TableCell>
-                        <TableCell>{a.startDate ?? "-"}</TableCell>
-                        <TableCell>{a.endDate ?? "-"}</TableCell>
-                        <TableCell>
-                          <Stack direction="row" spacing={1.2}>
-                            <Button
-                              size="small"
-                              variant="outlined"
-                              startIcon={<EditIcon />}
-                              component={RouterLink}
-                              to={`/assets/${a.assetSerialNumber}/edit`}
-                            >
-                              수정
-                            </Button>
-                            <Button
-                              size="small"
-                              color="error"
-                              variant="text"
-                              startIcon={<DeleteOutlineIcon />}
-                              onClick={() => handleDeleteClick(a.assetSerialNumber)}
-                            >
-                              삭제
-                            </Button>
-                          </Stack>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {pagedAssets.map((a) => {
+                      const device = devices.find(
+                        d => d.serialNumber === a.deviceSerialNumber
+                      );
+                      const isPc = device && Number(device.catId) === 2;
+
+                      return (
+                        <TableRow key={a.assetSerialNumber}>
+                          <TableCell
+                            sx={
+                              isPc ? {
+                                cursor: "pointer",
+                                textDecoration: "underline",
+                                color: "primary.main",
+                              } : undefined
+                            }
+                            onClick={isPc ? () => handleSerialNumberClick(a) : undefined}
+                          >
+                            {a.assetSerialNumber}
+                          </TableCell>
+                          <TableCell>{a.assetName}</TableCell>
+                          <TableCell>{a.location}</TableCell>
+                          <TableCell>{a.deviceSerialNumber}</TableCell>
+                          <TableCell>{a.deviceName}</TableCell>
+                          <TableCell>{a.userName ?? "-"}</TableCell>
+                          <TableCell>{a.startDate ?? "-"}</TableCell>
+                          <TableCell>{a.endDate ?? "-"}</TableCell>
+                          <TableCell>
+                            <Stack direction="row" spacing={1.2}>
+                              <Button
+                                size="small"
+                                variant="outlined"
+                                startIcon={<EditIcon />}
+                                component={RouterLink}
+                                to={`/assets/${a.assetSerialNumber}/edit`}
+                              >
+                                수정
+                              </Button>
+                              <Button
+                                size="small"
+                                color="error"
+                                variant="text"
+                                startIcon={<DeleteOutlineIcon />}
+                                onClick={() => handleDeleteClick(a.assetSerialNumber)}
+                              >
+                                삭제
+                              </Button>
+                            </Stack>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </TableContainer>
+              <Box sx={{ display: "flex", justifyContent: "center", py: 2 }}>
+                <Pagination
+                  count={pageCount}
+                  page={page}
+                  onChange={handleChangePage}
+                  color="primary"
+                  shape="rounded"
+                  showFirstButton
+                  showLastButton
+                />
+              </Box>
             </Paper>
+
+            <Dialog
+              open={logModalOpen}
+              onClose={() => setLogModalOpen(false)}
+              maxWidth="sm"
+              fullWidth
+            >
+              <DialogContent dividers>
+                <Typography sx={{ mb: 5 }}>
+                  {log.assetName}
+                </Typography>
+                <Stack spacing={1.2}>
+                  <Typography>
+                    CPU 사용률 : {log.cpuUsage ? `${log.cpuUsage}%` : "-"}
+                  </Typography>
+                  <Typography>
+                    메모리 사용률 : {log.memoryUsage ? `${log.memoryUsage}%` : "-"}
+                  </Typography>
+                  <Typography>
+                    디스크 사용률 : {log.diskUsage ? `${log.diskUsage}%` : "-"}
+                  </Typography>
+                  <Typography>
+                    점검일자 : {log.checkDate || "-"}
+                  </Typography>
+                </Stack>
+              </DialogContent>
+            </Dialog>
 
             <Dialog
               open={deleteConfirmOpen}

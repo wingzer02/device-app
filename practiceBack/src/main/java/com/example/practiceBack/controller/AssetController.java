@@ -21,6 +21,11 @@ public class AssetController {
         return assetService.getAllAssets();
     }
 
+    @GetMapping("/{assetSerialNumber}")
+    public Asset getAsset(@PathVariable String assetSerialNumber) {
+        return assetService.getAsset(assetSerialNumber);
+    }
+
     @PostMapping
     public void addAsset(@RequestBody Asset asset) {
         assetService.addAsset(asset);

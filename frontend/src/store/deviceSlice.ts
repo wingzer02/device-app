@@ -7,7 +7,7 @@ export interface Device {
   catId?: string;
   catName?: string;
   deviceName?: string;
-  company?: string;
+  company?: string | null;
   purchaseDate?: string;
 }
 
@@ -48,9 +48,20 @@ export const addDevice = createAsyncThunk(
  */
 export const deleteDevice = createAsyncThunk(
   "device/deleteDevice",
-  async (serialNumber: string) => {
-    const res = await axios.delete(`${API_BASE_URL}/${serialNumber}`);
-    return res.data;
+  async (serialNumber: string, { rejectWithValue }) => {
+    try {
+      const res = await axios.delete(`${API_BASE_URL}/${serialNumber}`);
+      return res.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.log(error);
+        const message = error.response?.data?.message;
+        return rejectWithValue(
+          "해당 장비는 관리코드 " 
+          + message + 
+          " 의 자산으로 등록 되어 있어 삭제할 수 없습니다.");
+      }
+    }
   }
 );
 

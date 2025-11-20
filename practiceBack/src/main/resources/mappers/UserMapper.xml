@@ -23,6 +23,19 @@
         LEFT JOIN role r ON u.role = r.role_id;
     </select>
 
+    <select id="findAllAdminPage" resultType="com.example.practiceBack.dto.User">
+        SELECT
+        u.userid,
+        u.name,
+        u.email,
+        u.del_flg,
+        u.role,
+        r.role_name
+        FROM user u
+        LEFT JOIN role r ON u.role = r.role_id
+        WHERE u.role != 'admin';
+    </select>
+
     <select id="findByUserid" parameterType="string" resultType="com.example.practiceBack.dto.User">
         SELECT
         u.userid,

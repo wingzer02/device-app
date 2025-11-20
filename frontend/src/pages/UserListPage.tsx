@@ -1,15 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../hooks/useApp";
-import { fetchAllUsers, deleteUser, logout, User } from "../store/userSlice";
+import { fetchAllUsersAdminPage, deleteUser, logoutUser, User } from "../store/userSlice";
 import { useNavigate } from "react-router-dom";
 import { 
-  AppBar,
-  Toolbar,
   Box,
   Container,
   Paper,
   Button,
-  IconButton,
   Table,
   TableHead,
   TableBody,
@@ -17,17 +14,17 @@ import {
   TableCell,
   TableContainer,
   Stack,
-  Tooltip,
   TextField,
-  Typography
  } from "@mui/material";
-import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import UpdateRoleModal from "../components/UpdateRoleModal";
-import ManagementSidebar from "../components/ManagementSidebar";
+import CommonSidebar from "../components/CommonSidebar";
+import CommonHeader from "../components/CommonHeader";
+import { NO_PHOTO_URL, USER_NAME_NULL } from "../utils/text";
+import { toUploadsUrl } from "../utils/url";
 
 const UserListPage: React.FC = () => {
 
-  const { list } = useAppSelector((s) => s.user);
+  const { listAdminPage, isAuthenticated, profile } = useAppSelector((s) => s.user);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
@@ -35,20 +32,23 @@ const UserListPage: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [searchName, setSearchName] = useState("");
 
+  const photoSrc = toUploadsUrl(profile.photoUrl) || NO_PHOTO_URL;
+  const userName = profile.name ? profile.name : USER_NAME_NULL;
+  
   useEffect(() => {
-    dispatch(fetchAllUsers());
+    dispatch(fetchAllUsersAdminPage());
   }, [dispatch]);
 
   // 검색
   const keyword = searchName.trim().toLowerCase();
   const filteredList = 
     keyword === ""
-      ? list
-      : list.filter((u) => u.name.toLowerCase().includes(keyword))
+      ? listAdminPage
+      : listAdminPage.filter((u) => u.name.toLowerCase().includes(keyword))
 
   // 뒤로 버튼 클릭
-  const handleLogout = () => {
-    dispatch(logout());
+  const handleLogout = async () => {
+    await dispatch(logoutUser());
     navigate("/");
   };
 
@@ -56,7 +56,7 @@ const UserListPage: React.FC = () => {
   const handleDeleteClick = async (userid: string) => {
     await dispatch(deleteUser(userid));
     alert("사용자가 탈퇴되었습니다.");
-    dispatch(fetchAllUsers());
+    dispatch(fetchAllUsersAdminPage());
   };
 
   const handleOpenUpdateRole = (u: User) => {
@@ -66,22 +66,15 @@ const UserListPage: React.FC = () => {
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
-      <AppBar position="static" color="default" elevation={0}>
-        <Toolbar sx={{ gap: 1 }}>
-          <Tooltip title="로그인으로 돌아가기">
-            <IconButton edge="start" onClick={handleLogout}>
-              <ArrowBackIosNewIcon />
-            </IconButton>
-          </Tooltip>
-          <Typography variant="h6" sx={{ fontWeight: 700 }}>
-            사용자 관리
-          </Typography>
-          <Box sx={{ flexGrow: 1 }} />
-        </Toolbar>
-      </AppBar>
-
+      <CommonHeader
+        title="사용자 관리"
+        userName={userName}
+        photoSrc={photoSrc}
+        onLogout={handleLogout}
+        isAuthenticated={isAuthenticated}
+      />
       <Box sx={{ display: "flex" }}>
-        <ManagementSidebar />
+        <CommonSidebar />
         <Container maxWidth="lg" sx={{ py: 3 }}>
           <Paper
             elevation={0}
@@ -192,7 +185,7 @@ const UserListPage: React.FC = () => {
           onSuccess={() => {
             setOpen(false);
             setSelectedUser(null);
-            dispatch(fetchAllUsers());
+            dispatch(fetchAllUsersAdminPage());
           }}
         />
       ) : null}

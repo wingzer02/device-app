@@ -56,15 +56,17 @@ const AddDeviceModal: React.FC<AddDeviceModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    const fixedCompany =
+      form.company.trim() === "" ? null : form.company.trim();
+
     await dispatch(addDevice({
       serialNumber: form.serialNumber,
       catId: form.catId,
       deviceName: form.deviceName,
-      company: form.company,
+      company: fixedCompany,
       purchaseDate: form.purchaseDate,
     })).unwrap();
 
-    alert("장비가 등록되었습니다.");
     onClose();
     onSuccess();
 
@@ -76,6 +78,8 @@ const AddDeviceModal: React.FC<AddDeviceModalProps> = ({
       company: "",
       purchaseDate: "",
     });
+    
+    alert("장비가 등록되었습니다.");
   }
 
   const handleCancel = () => {
