@@ -9,4 +9,10 @@ import java.util.List;
 @Mapper
 public interface AssetUserMapper {
     List<User> findUsersByAssetSerialNumber(@Param("assetSerialNumber") String assetSerialNumber);
+    void deleteByAssetSerialNumber(@Param("assetSerialNumber") String assetSerialNumber);
+    void insertAssetUser(
+            @Param("assetSerialNumber") String assetSerialNumber,
+            @Param("userid") String userid
+    );
+    void deleteByUserId(@Param("userid") String userid);
 }

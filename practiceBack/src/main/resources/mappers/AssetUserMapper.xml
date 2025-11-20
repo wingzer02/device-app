@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.practiceBack.mapper.AssetUserMapper">
+
+    <!-- 자산에 연결된 전체 사용자 조회 -->
+    <select id="findUsersByAssetSerialNumber"
+            resultType="com.example.practiceBack.dto.User">
+        SELECT
+        u.userid,
+        u.name
+        FROM asset_user_rel aur
+        JOIN user u
+        ON aur.userid = u.userid
+        WHERE aur.asset_serial_number = #{assetSerialNumber}
+        ORDER BY aur.id ASC
+    </select>
+
+    <!-- 자산에 연결된 사용자 전체 삭제 -->
+    <delete id="deleteByAssetSerialNumber">
+        DELETE FROM asset_user_rel
+        WHERE asset_serial_number = #{assetSerialNumber}
+    </delete>
+
+    <!-- 자산-사용자 매핑 등록 -->
+    <insert id="insertAssetUser">
+        INSERT INTO asset_user_rel(asset_serial_number, userid)
+        VALUES (#{assetSerialNumber}, #{userid})
+    </insert>
+
+    <delete id="deleteByUserId" parameterType="string">
+        DELETE FROM asset_user_rel
+        WHERE userid = #{userid}
+    </delete>
+
+</mapper>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, Link as RouterLink } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../hooks/useApp";
 import { fetchAssets, deleteAsset, Asset } from "../store/assetSlice";
@@ -23,6 +23,7 @@ import {
   DialogActions,
   Pagination,
   Typography,
+  Tooltip,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
@@ -47,7 +48,8 @@ const AssetPage: React.FC = () => {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [page, setPage] = useState(1);
   const rowsPerPage = 10;
-  const pageCount = Math.max(1, Math.ceil(assets.length / rowsPerPage));
+  const [sortKey, setSortKey] = useState("");
+  const [sortDirection, setSortDirection] = useState("asc");
 
   const [logModalOpen, setLogModalOpen] = useState(false);
 
@@ -105,9 +107,65 @@ const AssetPage: React.FC = () => {
     setPage(value);
   };
 
-  const pagedAssets = assets.slice(
-    (page - 1) * rowsPerPage,
-    (page - 1) * rowsPerPage + rowsPerPage
+  const handleSort = (key: string) => {
+    if (sortKey === key) {
+      if (sortDirection === "asc") {
+        setSortDirection("desc");
+      } else {
+        setSortDirection("asc");
+      }
+    } else {
+      setSortKey(key);
+      setSortDirection("asc");
+    }
+    setPage(1);
+  };
+
+  const sortList = useMemo(() => {
+    const arr = [...assets];
+    const getVal = (a: Asset) => {
+      switch (sortKey) {
+        case 'location' : return a.location;
+        case 'startDate' : return a.startDate;
+        case 'endDate' : return a.endDate;
+        default : return "";
+      }
+    }
+    arr.sort((a, b) => {
+      const av = getVal(a);
+      const bv = getVal(b);
+
+      // 값이 없으면 맨 뒤로 배치
+      if (!av) return 1;
+      if (!bv) return -1;
+
+      // 날짜의 경우
+      if (sortKey === "startDate" || sortKey === "endDate") {
+        const at = new Date(av).getTime();
+        const bt = new Date(bv).getTime();
+        return sortDirection === "asc" ? at - bt : bt - at;
+      // 날짜 이외의 경우 (문자)
+      } else {
+        if (av < bv) {
+          return sortDirection === "asc" ? -1 : 1;
+        }
+        if (av > bv) {
+          return sortDirection === "asc" ? 1 : -1;
+        }
+        return 0;
+      }
+    })
+    return arr;
+  }, [assets, sortKey, sortDirection]);
+
+  const pageCount = Math.max(1, Math.ceil(sortList.length / rowsPerPage));
+
+  const pagedAssets = useMemo(
+    () => sortList.slice(
+      (page - 1) * rowsPerPage,
+      (page - 1) * rowsPerPage + rowsPerPage
+    ),
+    [sortList, page, rowsPerPage]
   );
 
   return (
@@ -156,12 +214,27 @@ const AssetPage: React.FC = () => {
                     <TableRow>
                       <TableCell sx={{ fontWeight: 700 }}>관리코드</TableCell>
                       <TableCell sx={{ fontWeight: 700 }}>자산명</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>설치장소</TableCell>
+                      <TableCell 
+                        sx={{ fontWeight: 700, cursor: "pointer" }}
+                        onClick={() => handleSort("location")}
+                      >
+                        설치장소{sortKey === "location" ? (sortDirection === "asc" ? " ▲" : " ▼") : ""}
+                      </TableCell>
                       <TableCell sx={{ fontWeight: 700 }}>장비일련번호</TableCell>
                       <TableCell sx={{ fontWeight: 700 }}>장비명</TableCell>
                       <TableCell sx={{ fontWeight: 700 }}>사용자명</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>사용시작일</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>사용종료일</TableCell>
+                      <TableCell 
+                        sx={{ fontWeight: 700, cursor: "pointer" }}
+                        onClick={() => handleSort("startDate")}
+                      >
+                        사용시작일{sortKey === "startDate" ? (sortDirection === "asc" ? " ▲" : " ▼") : ""}
+                      </TableCell>
+                      <TableCell 
+                        sx={{ fontWeight: 700, cursor: "pointer" }}
+                        onClick={() => handleSort("endDate")}
+                      >
+                        사용종료일{sortKey === "endDate" ? (sortDirection === "asc" ? " ▲" : " ▼") : ""}
+                      </TableCell>
                       <TableCell sx={{ fontWeight: 700 }}></TableCell>
                     </TableRow>
                   </TableHead>
@@ -171,6 +244,13 @@ const AssetPage: React.FC = () => {
                         d => d.serialNumber === a.deviceSerialNumber
                       );
                       const isPc = device && Number(device.catId) === 2;
+
+                      const userNames = a.userNames ?? [];
+                      const primaryName = userNames[0] ?? "-";
+                      const extraCount = userNames.length === 2 ? 1 : 0;
+                      const displayText =
+                        extraCount > 0 ? `${primaryName} 외 ${extraCount}명` : primaryName;
+                      const tooltipText = userNames.join(", ");
 
                       return (
                         <TableRow key={a.assetSerialNumber}>
@@ -190,7 +270,15 @@ const AssetPage: React.FC = () => {
                           <TableCell>{a.location}</TableCell>
                           <TableCell>{a.deviceSerialNumber}</TableCell>
                           <TableCell>{a.deviceName}</TableCell>
-                          <TableCell>{a.userName ?? "-"}</TableCell>
+                          <TableCell>
+                            {userNames.length > 1 ? (
+                              <Tooltip title={tooltipText} enterDelay={1000} arrow>
+                                <span>{displayText}</span>
+                              </Tooltip>
+                            ) : (
+                              displayText
+                            )}
+                          </TableCell>
                           <TableCell>{a.startDate ?? "-"}</TableCell>
                           <TableCell>{a.endDate ?? "-"}</TableCell>
                           {isGuest ? <TableCell></TableCell> : (

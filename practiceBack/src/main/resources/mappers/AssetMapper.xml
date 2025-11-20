@@ -11,14 +11,11 @@
         a.asset_serial_number,
         a.asset_name,
         a.location,
-        a.userid,
-        u.name as user_name,
         a.device_serial_number,
         d.device_name,
         a.start_date,
         a.end_date
         FROM asset a
-        LEFT JOIN user u ON u.userid = a.userid
         LEFT JOIN device d ON d.serial_number = a.device_serial_number
     </select>
 
@@ -27,13 +24,10 @@
         a.asset_serial_number,
         a.asset_name,
         a.location,
-        a.userid,
-        u.name as user_name,
         a.device_serial_number,
         a.start_date,
         a.end_date
         FROM asset a
-        LEFT JOIN user u ON u.userid = a.userid
         WHERE a.asset_serial_number = #{assetSerialNumber}
     </select>
 
@@ -50,7 +44,6 @@
         asset_serial_number,
         asset_name,
         location,
-        userid,
         device_serial_number,
         start_date,
         end_date
@@ -58,7 +51,6 @@
         #{assetSerialNumber},
         #{assetName},
         #{location},
-        #{userid},
         #{deviceSerialNumber},
         #{startDate},
         #{endDate}
@@ -70,7 +62,6 @@
         SET
         asset_name = #{assetName},
         location = #{location},
-        userid = #{userid},
         device_serial_number = #{deviceSerialNumber},
         start_date = #{startDate},
         end_date = #{endDate}
@@ -82,9 +73,4 @@
         WHERE asset_serial_number = #{assetSerialNumber}
     </delete>
 
-    <update id="clearUser" parameterType="string">
-        UPDATE asset
-        SET userid = NULL
-        WHERE userid = #{userid}
-    </update>
 </mapper>
