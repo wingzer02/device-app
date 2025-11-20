@@ -7,19 +7,32 @@ export interface Asset {
   assetSerialNumber: string;
   assetName: string;
   location: string;
-  userid: string;
+  userid?: string;
   userName: string;
   deviceSerialNumber: string;
+  deviceName: string;
   startDate?: string;
   endDate?: string;
 }
 
 interface AssetState {
   list: Asset[];
+  asset: Asset;
 }
 
 const initialState: AssetState = {
   list: [],
+  asset: {
+    assetSerialNumber: "",
+    assetName: "",
+    location: "",
+    userid: "",
+    userName: "",
+    deviceSerialNumber: "",
+    deviceName: "",
+    startDate: "",
+    endDate: "",
+  },
 };
 
 /**
@@ -29,6 +42,17 @@ export const fetchAssets = createAsyncThunk(
   "asset/fetchAssets",
   async () => {
     const res = await axios.get<Asset[]>(API_BASE_URL);
+    return res.data;
+  }
+);
+
+/**
+ * 자산 단건 조회
+ */
+export const fetchAssetBySerialNumber = createAsyncThunk(
+  "asset/fetchAssetBySerialNumber",
+  async (assetSerialNumber: string) => {
+    const res = await axios.get<Asset>(`${API_BASE_URL}/${assetSerialNumber}`);
     return res.data;
   }
 );
@@ -77,6 +101,10 @@ const assetSlice = createSlice({
       })
       .addCase(fetchAssets.rejected, (state) => {
         state.list = [];
+      })
+
+      .addCase(fetchAssetBySerialNumber.fulfilled, (state, action) => {
+        state.asset = action.payload;
       })
   },
 });

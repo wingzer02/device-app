@@ -19,7 +19,7 @@ const UserInfoPage: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const { profile } = useAppSelector((s) => s.user);
+  const { profile, status } = useAppSelector((s) => s.user);
   const objectUrlRef = useRef<string | null>(null);
 
   const [password, setPassword] = useState("");
@@ -29,8 +29,9 @@ const UserInfoPage: React.FC = () => {
   const [preview, setPreview] = useState("");
 
   useEffect(() => {
+    if (!profile.userid || status !== "succeeded") return;
     dispatch(fetchUserByUserid(profile.userid));
-  }, [dispatch, profile.userid]);
+  }, [dispatch, profile.userid, status]);
 
   useEffect(() => {
     setEmail(profile.email);

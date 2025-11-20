@@ -30,6 +30,13 @@ public class UserController {
         return userService.findAll();
     }
 
+    // 사용자 전체 조회(사용자 관리)
+    @GetMapping("/admin")
+    public List<User> listAllUsersAdmin() {
+        return userService.findAllAdminPage();
+    }
+
+
     // 회원가입
     @PostMapping("/register")
     public void insert(@RequestBody User user) {
@@ -123,10 +130,13 @@ public class UserController {
 
     // 토큰 재발급
     @PostMapping("/reissue")
-    public ResponseEntity<Void> reissue(
-            @CookieValue("refreshToken") String refreshToken,
+    public ResponseEntity<?> reissue(
+            @CookieValue(value = "refreshToken", required = false) String refreshToken,
             HttpServletResponse response
     ) {
+        if (refreshToken == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("refresh token 이 없습니다.");
+        }
         Map<String, String> tokens = userService.reissueTokens(refreshToken);
 
         String newAccess = tokens.get("accessToken");

@@ -15,7 +15,7 @@ import {
 } from "@mui/material";
 import { ERR_REGISTER_DATE } from "../utils/text";
 
-const locationOptions = ["서울", "대전", "대구", "부산"];
+const locationOptions = ["A city", "B city", "C city", "D city"];
 
 const AssetRegisterPage: React.FC = () => {
   const navigate = useNavigate();
@@ -53,9 +53,10 @@ const AssetRegisterPage: React.FC = () => {
       assetSerialNumber,
       assetName,
       location,
-      userid,
+      userid: userid || undefined,
       userName: selectedUser?.name ?? "",
       deviceSerialNumber,
+      deviceName: "",
       startDate: startDate || undefined,
       endDate: endDate || undefined,
     };
@@ -132,7 +133,7 @@ const AssetRegisterPage: React.FC = () => {
               )
               .map((d: Device) => (
                 <MenuItem key={d.serialNumber} value={d.serialNumber}>
-                  {d.serialNumber}
+                  {d.serialNumber + " - " + d.deviceName}
                 </MenuItem>
               ))}
           </TextField>

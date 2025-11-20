@@ -11,6 +11,8 @@ public interface UserMapper {
 
     List<User> findAll();
 
+    List<User> findAllAdminPage();
+
     // 회원가입
     void insertUser(User user);
 

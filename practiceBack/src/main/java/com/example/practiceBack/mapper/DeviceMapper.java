@@ -9,6 +9,6 @@ import java.util.List;
 public interface DeviceMapper {
     List<Device> findAll();
     void insertDevice(Device device);
-    void updateDeviceUser(Device device);
     void deleteBySerialNumber(@Param("serialNumber") String serialNumber);
+    int findCatIdBySerialNumber(@Param("serialNumber") String serialNumber);
 }

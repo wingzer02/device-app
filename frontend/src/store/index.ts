@@ -4,6 +4,7 @@ import deviceReducer from "./deviceSlice";
 import categoryReducer from "./categorySlice";
 import roleReducer from "./roleSlice";
 import assetReducer from "./assetSlice"
+import logReducer from './logSlice'
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     category: categoryReducer,
     role: roleReducer,
     asset: assetReducer,
+    log: logReducer,
   }
 });
 

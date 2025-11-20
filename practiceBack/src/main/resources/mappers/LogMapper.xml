@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.practiceBack.mapper.LogMapper">
+
+    <select id="findAll" resultType="com.example.practiceBack.dto.Log">
+        SELECT
+        l.asset_serial_number,
+        a.asset_name,
+        a.device_serial_number,
+        d.device_name,
+        l.cpu_usage,
+        l.memory_usage,
+        l.disk_usage,
+        l.check_date
+        FROM log l
+        LEFT JOIN asset a
+        ON a.asset_serial_number = l.asset_serial_number
+        LEFT JOIN device d
+        ON d.serial_number = a.device_serial_number
+    </select>
+
+    <select id="findByAssetSerialNumber"
+            parameterType="string"
+            resultType="com.example.practiceBack.dto.Log">
+        SELECT
+        l.asset_serial_number,
+        a.asset_name,
+        a.device_serial_number,
+        d.device_name,
+        l.cpu_usage,
+        l.memory_usage,
+        l.disk_usage,
+        l.check_date
+        FROM log l
+        LEFT JOIN asset a
+        ON a.asset_serial_number = l.asset_serial_number
+        LEFT JOIN device d
+        ON d.serial_number = a.device_serial_number
+        WHERE l.asset_serial_number = #{assetSerialNumber}
+    </select>
+
+    <update id="updateLog" parameterType="com.example.practiceBack.dto.Log">
+        UPDATE log
+        SET
+        cpu_usage    = #{cpuUsage},
+        memory_usage = #{memoryUsage},
+        disk_usage   = #{diskUsage},
+        check_date   = #{checkDate}
+        WHERE asset_serial_number = #{assetSerialNumber}
+    </update>
+
+    <insert id="insertLog" parameterType="string">
+        INSERT INTO log (asset_serial_number)
+        VALUES (#{assetSerialNumber});
+    </insert>
+</mapper>

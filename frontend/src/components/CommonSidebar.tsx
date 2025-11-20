@@ -7,23 +7,26 @@ import {
   ListItemText,
 } from "@mui/material";
 
-type ManagementSectionKey = "assets" | "devices" | "users";
+type SectionKey = "assets" | "devices" | "logs" | "users";
 
-const labels: Record<ManagementSectionKey, string> = {
+const labels: Record<SectionKey, string> = {
   assets: "자산 관리",
   devices: "장비 관리",
+  logs: "로그 관리",
   users: "사용자 관리",
 };
 
-const ManagementSidebar: React.FC = () => {
+const CommonSidebar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const currentKey: ManagementSectionKey =
+  const currentKey: SectionKey =
     location.pathname.startsWith("/assets")
       ? "assets"
       : location.pathname.startsWith("/devices")
       ? "devices"
+      : location.pathname.startsWith("/logs")
+      ? "logs"
       : "users";
 
   const handleNavigate = (path: string) => {
@@ -58,6 +61,12 @@ const ManagementSidebar: React.FC = () => {
           <ListItemText primary={labels.devices} />
         </ListItemButton>
         <ListItemButton
+          selected={currentKey === "logs"}
+          onClick={() => handleNavigate("/logs")}
+        >
+          <ListItemText primary={labels.logs} />
+        </ListItemButton>
+        <ListItemButton
           selected={currentKey === "users"}
           onClick={() => handleNavigate("/user-list")}
         >
@@ -68,4 +77,4 @@ const ManagementSidebar: React.FC = () => {
   );
 };
 
-export default ManagementSidebar;
+export default CommonSidebar;

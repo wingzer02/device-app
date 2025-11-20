@@ -14,10 +14,34 @@
         a.userid,
         u.name as user_name,
         a.device_serial_number,
+        d.device_name,
         a.start_date,
         a.end_date
         FROM asset a
         LEFT JOIN user u ON u.userid = a.userid
+        LEFT JOIN device d ON d.serial_number = a.device_serial_number
+    </select>
+
+    <select id="findBySerialNumber" parameterType="string" resultType="com.example.practiceBack.dto.Asset">
+        SELECT
+        a.asset_serial_number,
+        a.asset_name,
+        a.location,
+        a.userid,
+        u.name as user_name,
+        a.device_serial_number,
+        a.start_date,
+        a.end_date
+        FROM asset a
+        LEFT JOIN user u ON u.userid = a.userid
+        WHERE a.asset_serial_number = #{assetSerialNumber}
+    </select>
+
+    <select id="findAssetSnByDeviceSn" parameterType="string" resultType="string">
+        SELECT
+        asset_serial_number
+        FROM asset
+        WHERE device_serial_number = #{deviceSerialNumber}
     </select>
 
     <!-- 자산 등록 -->
@@ -57,4 +81,10 @@
         DELETE FROM asset
         WHERE asset_serial_number = #{assetSerialNumber}
     </delete>
+
+    <update id="clearUser" parameterType="string">
+        UPDATE asset
+        SET userid = NULL
+        WHERE userid = #{userid}
+    </update>
 </mapper>
