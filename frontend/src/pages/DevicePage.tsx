@@ -78,11 +78,12 @@ const DevicePage: React.FC = () => {
   // 장비 삭제 모달 - 확인 버튼 클릭
   const handleDeleteConfirm = async () => {
     try {
-      await dispatch(deleteDevice(deleteTarget));
+      await dispatch(deleteDevice(deleteTarget)).unwrap();
       setDeleteTarget("");
       setDeleteConfirmOpen(false);
       dispatch(fetchDevices());
     } catch (error) {
+      setDeleteConfirmOpen(false);
       alert(error);
     }
   };
@@ -122,12 +123,8 @@ const DevicePage: React.FC = () => {
       const bv = getVal(b);
 
       // 값이 없으면 맨 뒤로 배치
-      if (!av) {
-        return 1;
-      }
-      if (!bv) {
-        return -1;
-      }
+      if (!av) return 1;
+      if (!bv) return -1;
 
       // 날짜의 경우
       if (sortKey === "purchaseDate") {

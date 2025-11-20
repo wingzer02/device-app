@@ -3,6 +3,7 @@ package com.example.practiceBack.service;
 import com.example.practiceBack.dto.User;
 import com.example.practiceBack.dto.LoginRequest;
 import com.example.practiceBack.mapper.AssetMapper;
+import com.example.practiceBack.mapper.AssetUserMapper;
 import com.example.practiceBack.mapper.UserMapper;
 import com.example.practiceBack.security.JwtUtil;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -26,13 +27,18 @@ public class UserService {
     private final UserMapper userMapper;
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
-    private final AssetMapper assetMapper;
+    private final AssetUserMapper assetUserMapper;
 
-    public UserService(UserMapper userMapper, JwtUtil jwtUtil, PasswordEncoder passwordEncoder, AssetMapper assetMapper) {
+    public UserService(
+            UserMapper userMapper,
+            JwtUtil jwtUtil,
+            PasswordEncoder passwordEncoder,
+            AssetUserMapper assetUserMapper
+    ) {
         this.userMapper = userMapper;
         this.jwtUtil = jwtUtil;
         this.passwordEncoder = passwordEncoder;
-        this.assetMapper = assetMapper;
+        this.assetUserMapper = assetUserMapper;
     }
 
     // 회원가입
@@ -102,8 +108,8 @@ public class UserService {
 
     // 사용자 삭제
     public void deleteUser(String userid) {
-        assetMapper.clearUser(userid);
         userMapper.deleteUser(userid);
+        assetUserMapper.deleteByUserId(userid);
     }
 
     // 사용자 권한 갱신

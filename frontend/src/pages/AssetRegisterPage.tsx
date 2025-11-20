@@ -12,7 +12,9 @@ import {
   Button,
   MenuItem,
   Stack,
+  IconButton,
 } from "@mui/material";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { ERR_REGISTER_DATE, LOCATION_OPTIONS } from "../utils/text";
 
 const AssetRegisterPage: React.FC = () => {
@@ -27,7 +29,7 @@ const AssetRegisterPage: React.FC = () => {
   const [assetName, setAssetName] = useState("");
   const [location, setLocation] = useState("");
   const [deviceSerialNumber, setDeviceSerialNumber] = useState("");
-  const [userid, setUserid] = useState("");
+  const [userIds, setUserIds] = useState<string[]>([""]);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
@@ -45,14 +47,17 @@ const AssetRegisterPage: React.FC = () => {
       return;
     }
 
-    const selectedUser = users.find((u: User) => u.userid === userid);
+    const selectedUsers = userIds
+      // 빈값 제외
+      .filter((id) => id)
+      .map((id) => users.find((u: User) => u.userid === id))
+      .filter((u): u is User => !!u);
 
     const newAsset: Asset = {
       assetSerialNumber,
       assetName,
       location,
-      userid: userid || undefined,
-      userName: selectedUser?.name ?? "",
+      userIds: selectedUsers.map((u) => u.userid),
       deviceSerialNumber,
       deviceName: "",
       startDate: startDate || undefined,
@@ -67,6 +72,20 @@ const AssetRegisterPage: React.FC = () => {
 
   const handleCancel = () => {
     navigate("/assets");
+  };
+
+  const handleChangeUser = (index: number, value: string) => {
+    setUserIds((prev) => {
+      const copy = [...prev];
+      copy[index] = value;
+      return copy;
+    });
+  };
+
+  const handleAddUser = () => {
+    setUserIds((prev) => {
+      return [...prev, ""];
+    });
   };
 
   return (
@@ -136,23 +155,44 @@ const AssetRegisterPage: React.FC = () => {
               ))}
           </TextField>
 
-          <TextField
-            select
-            label="사용자명"
-            value={userid}
-            onChange={(e) => setUserid(e.target.value)}
-            fullWidth
-          >
-            <MenuItem value="">선택</MenuItem>
-            {users
-              .filter((u: User) => !u.delFlg)
-              .map((u: User) => (
-                <MenuItem key={u.userid} value={u.userid}>
-                  {u.name}
-                </MenuItem>
-              ))}
-          </TextField>
+          {userIds.map((id, index) => (
+            <TextField
+              key={index}
+              select
+              label="사용자명"
+              value={id}
+              onChange={(e) => handleChangeUser(index, e.target.value)}
+              fullWidth
+            >
+              <MenuItem value="">선택</MenuItem>
+              {users
+                .filter((u: User) => !u.delFlg)
+                .map((u: User) => {
+                  const alreadySelected = userIds.some((selectedId, i) => selectedId === u.userid && i !== index);
+                  return (
+                    <MenuItem 
+                      key={u.userid} 
+                      value={u.userid}
+                      disabled={alreadySelected}
+                    >
+                      {u.name}
+                    </MenuItem>
+                  );
+                })}
+            </TextField>
+          ))}
 
+          <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+            {userIds.length < 2 && (
+              <IconButton
+                onClick={handleAddUser}
+                size="small"
+              >
+                <AddCircleOutlineIcon />
+              </IconButton>
+            )}
+          </Box>
+              
           <TextField
             label="사용시작일"
             type="date"

@@ -10,7 +10,9 @@ import {
   Button,
   MenuItem,
   Stack,
+  IconButton,
 } from "@mui/material";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { ERR_REGISTER_DATE, LOCATION_OPTIONS } from "../utils/text";
 import { Device, fetchDevices } from "../store/deviceSlice";
 import { fetchAllUsers, User } from "../store/userSlice";
@@ -27,7 +29,7 @@ const AssetEditPage: React.FC = () => {
 
   const [assetName, setAssetName] = useState("");
   const [deviceSerialNumber, setDeviceSerialNumber] = useState("");
-  const [userid, setUserid] = useState("");
+  const [userIds, setUserIds] = useState<string[]>([""]);
   const [location, setLocation] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -44,14 +46,20 @@ const AssetEditPage: React.FC = () => {
   }, [dispatch, assetSerialNumber]);
 
   useEffect(() => {
-    if (!asset || asset.assetSerialNumber !== assetSerialNumber) return;
+    if (!asset || !asset.assetSerialNumber) return;
+
     setAssetName(asset.assetName);
     setDeviceSerialNumber(asset.deviceSerialNumber);
-    setUserid(asset.userid ?? "");
     setLocation(asset.location);
     setStartDate(asset.startDate ?? "");
     setEndDate(asset.endDate ?? "");
-  }, [asset, assetSerialNumber]);
+
+    if (asset.userIds && asset.userIds.length > 0) {
+      setUserIds(asset.userIds);
+    } else {
+      setUserIds([""]);
+    }
+  }, [asset]);
 
   const handleCancel = () => {
     navigate("/assets");
@@ -64,11 +72,16 @@ const AssetEditPage: React.FC = () => {
       return;
     }
 
+    const selectedUsers = userIds
+      .filter((id) => id)
+      .map((id) => users.find((u: User) => u.userid === id))
+      .filter((u): u is User => !!u);
+
     const params: Asset = {
       ...asset,
       assetName,
       deviceSerialNumber,
-      userid,
+      userIds: selectedUsers.map((u) => u.userid),
       location,
       startDate: startDate || undefined,
       endDate: endDate || undefined,
@@ -78,6 +91,20 @@ const AssetEditPage: React.FC = () => {
     await dispatch(fetchAssets());
     alert("자산 정보가 수정되었습니다.");
     navigate("/assets");
+  };
+  
+  const handleChangeUser = (index: number, value: string) => {
+    setUserIds((prev) => {
+      const copy = [...prev];
+      copy[index] = value;
+      return copy;
+    });
+  };
+
+  const handleAddUser = () => {
+    setUserIds((prev) => {
+      return [...prev, ""];
+    });
   };
 
   return (
@@ -150,22 +177,45 @@ const AssetEditPage: React.FC = () => {
                 </MenuItem>
               ))}
           </TextField>
-          <TextField
-            select
-            label="사용자명"
-            value={userid}
-            onChange={(e) => setUserid(e.target.value)}
-            fullWidth
-          >
-            <MenuItem value="">선택</MenuItem>
-            {users
-              .filter((u: User) => !u.delFlg)
-              .map((u: User) => (
-                <MenuItem key={u.userid} value={u.userid}>
-                  {u.name}
-                </MenuItem>
-              ))}
-          </TextField>
+          
+          {userIds.map((id, index) => (
+            <TextField
+              key={index}
+              select
+              label="사용자명"
+              value={id}
+              onChange={(e) => handleChangeUser(index, e.target.value)}
+              fullWidth
+            >
+              <MenuItem value="">선택</MenuItem>
+              {users
+                .filter((u: User) => !u.delFlg)
+                .map((u: User) => {
+                  const alreadySelected = userIds.some((selectedId, i) => selectedId === u.userid && i !== index);
+                  return (
+                    <MenuItem 
+                      key={u.userid} 
+                      value={u.userid}
+                      disabled={alreadySelected}
+                    >
+                      {u.name}
+                    </MenuItem>
+                  );
+                })}
+            </TextField>
+          ))}
+
+          <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+            {userIds.length < 2 && (
+              <IconButton
+                onClick={handleAddUser}
+                size="small"
+              >
+                <AddCircleOutlineIcon />
+              </IconButton>
+            )}
+          </Box>
+
           <TextField
             label="사용 시작일"
             type="date"
