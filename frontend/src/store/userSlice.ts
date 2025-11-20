@@ -10,6 +10,7 @@ export interface User {
   role: string;
   roleName: string;
   delFlg: boolean;
+  adminRequestFlg: boolean;
 }
 
 interface UserState {
@@ -33,6 +34,7 @@ const initialState: UserState = {
     role: "",
     roleName: "",
     delFlg: false,
+    adminRequestFlg: false,
   },
   status: "none",
 };
@@ -224,6 +226,39 @@ export const updateRole = createAsyncThunk(
   }
 );
 
+/**
+ * 관리자 권한 신청
+ */
+export const requestAdmin = createAsyncThunk(
+  "user/requestAdmin",
+  async (userid: string) => {
+    const res = await axios.post(`${API_BASE_URL}/request-admin/${userid}`);
+    return res.data;
+  }
+);
+
+/**
+ * 관리자 신청 승인
+ */
+export const approveAdmin = createAsyncThunk(
+  "user/approveAdmin",
+  async (userid: string) => {
+    const res = await axios.post(`${API_BASE_URL}/approve-admin/${userid}`);
+    return res.data;
+  }
+);
+
+/**
+ * 관리자 신청 취소
+ */
+export const cancelAdmin = createAsyncThunk(
+  "user/cancelAdmin",
+  async (userid: string) => {
+    const res = await axios.post(`${API_BASE_URL}/cancel-admin/${userid}`);
+    return res.data;
+  }
+);
+
 const userSlice = createSlice({
   name: "user",
   initialState,
@@ -239,6 +274,7 @@ const userSlice = createSlice({
         role: "",
         roleName: "",
         delFlg: false,
+        adminRequestFlg: false,
       };
       state.status = "none";
     },
@@ -262,6 +298,7 @@ const userSlice = createSlice({
           role: "",
           roleName: "",
           delFlg: false,
+          adminRequestFlg: false,
         };
       })
 
@@ -286,6 +323,7 @@ const userSlice = createSlice({
           role: "",
           roleName: "",
           delFlg: false,
+          adminRequestFlg: false,
         };
       })
 
@@ -312,6 +350,10 @@ const userSlice = createSlice({
       .addCase(updateUser.fulfilled, (state, action) => {
         state.profile = action.payload;
       })
+
+      .addCase(registerUser.fulfilled, (state) => {
+        state.profile.adminRequestFlg = true;
+      });
   },
 });
 

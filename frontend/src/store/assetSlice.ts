@@ -7,8 +7,8 @@ export interface Asset {
   assetSerialNumber: string;
   assetName: string;
   location: string;
-  userid?: string;
-  userName: string;
+  userIds?: string[];
+  userNames?: string[];
   deviceSerialNumber: string;
   deviceName: string;
   startDate?: string;
@@ -26,8 +26,8 @@ const initialState: AssetState = {
     assetSerialNumber: "",
     assetName: "",
     location: "",
-    userid: "",
-    userName: "",
+    userIds: [""],
+    userNames: [""],
     deviceSerialNumber: "",
     deviceName: "",
     startDate: "",

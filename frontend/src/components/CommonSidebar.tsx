@@ -6,6 +6,7 @@ import {
   ListItemButton,
   ListItemText,
 } from "@mui/material";
+import { useAppSelector } from "../hooks/useApp";
 
 type SectionKey = "assets" | "devices" | "logs" | "users";
 
@@ -19,6 +20,8 @@ const labels: Record<SectionKey, string> = {
 const CommonSidebar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { profile } = useAppSelector((s) => s.user);
+  const isAdmin = profile.role === "admin";
 
   const currentKey: SectionKey =
     location.pathname.startsWith("/assets")
@@ -66,12 +69,14 @@ const CommonSidebar: React.FC = () => {
         >
           <ListItemText primary={labels.logs} />
         </ListItemButton>
-        <ListItemButton
-          selected={currentKey === "users"}
-          onClick={() => handleNavigate("/user-list")}
-        >
-          <ListItemText primary={labels.users} />
-        </ListItemButton>
+        {isAdmin && (
+          <ListItemButton
+            selected={currentKey === "users"}
+            onClick={() => handleNavigate("/user-list")}
+          >
+            <ListItemText primary={labels.users} />
+          </ListItemButton>
+        )}
       </List>
     </Box>
   );

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../hooks/useApp";
-import { fetchAllUsersAdminPage, deleteUser, logoutUser, User } from "../store/userSlice";
+import { fetchAllUsersAdminPage, deleteUser, logoutUser, User, cancelAdmin, approveAdmin } from "../store/userSlice";
 import { useNavigate } from "react-router-dom";
 import { 
   Box,
@@ -64,6 +64,18 @@ const UserListPage: React.FC = () => {
     setOpen(true);
   };
 
+  const handleApproveClick = async (userid: string) => {
+    if (!window.confirm("관리자 승인을 하시겠습니까?")) return;
+    await dispatch(approveAdmin(userid));
+    dispatch(fetchAllUsersAdminPage());
+  };
+
+  const handleCancelClick = async (userid: string) => {
+    if (!window.confirm("관리자 신청을 취소하시겠습니까?")) return;
+    await dispatch(cancelAdmin(userid));
+    dispatch(fetchAllUsersAdminPage());
+  }
+
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
       <CommonHeader
@@ -92,31 +104,31 @@ const UserListPage: React.FC = () => {
                 onChange={(e) => setSearchName(e.target.value)}
               />
             </Box>
-            <TableContainer sx={{ maxHeight: "calc(100vh - 240px)" }}>
+            <TableContainer>
               <Table>
                 <TableHead>
                   <TableRow>
                     <TableCell 
-                      sx={{ fontWeight: 700, width: 160 }}
+                      sx={{ fontWeight: 700 }}
                     >
                       아이디
                     </TableCell>
                     <TableCell 
-                      sx={{ fontWeight: 700, width: 160 }}
+                      sx={{ fontWeight: 700 }}
                     >
                       이름
                     </TableCell>
                     <TableCell 
-                      sx={{ fontWeight: 700, width: 300 }}
+                      sx={{ fontWeight: 700 }}
                     >
                       이메일
                     </TableCell>
                     <TableCell 
-                      sx={{ fontWeight: 700, width: 120 }}
+                      sx={{ fontWeight: 700 }}
                     >
                       권한
                     </TableCell>
-                    <TableCell sx={{ fontWeight: 700, minWidth: 220 }}></TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}></TableCell>
                   </TableRow>
                 </TableHead>
 
@@ -146,7 +158,27 @@ const UserListPage: React.FC = () => {
                         <TableCell>{u.roleName}</TableCell>
                         <TableCell>
                           {u.delFlg ? null :(
-                            <Stack direction="row" spacing={1.2}>
+                            <Stack direction="column" spacing={0.5} alignItems="flex-start">
+                              {u.role == "normal" && (
+                                <>
+                                <Button
+                                  size="small"
+                                  variant="text"
+                                  onClick={() => handleApproveClick(u.userid)}
+                                  disabled={!u.adminRequestFlg}
+                                >
+                                  승인
+                                </Button>
+                                <Button
+                                  size="small"
+                                  variant="text"
+                                  onClick={() => handleCancelClick(u.userid)}
+                                  disabled={!u.adminRequestFlg}
+                                >
+                                  취소
+                                </Button>
+                                </>
+                              )}
                               <Button
                                 size="small"
                                 variant="text"

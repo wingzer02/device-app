@@ -34,6 +34,7 @@ const LogPage: React.FC = () => {
 
   const photoSrc = toUploadsUrl(profile.photoUrl) || NO_PHOTO_URL;
   const userName = profile.name ? profile.name : USER_NAME_NULL;
+  const isGuest = profile.role === "guest";
 
   useEffect(() => {
     dispatch(fetchLogs());
@@ -70,7 +71,7 @@ const LogPage: React.FC = () => {
                 border: (t) => `1px solid ${t.palette.divider}`,
               }}
             >
-              <TableContainer sx={{ maxHeight: "calc(100vh - 240px)" }}>
+              <TableContainer>
                 <Table>
                   <TableHead>
                     <TableRow>
@@ -82,7 +83,7 @@ const LogPage: React.FC = () => {
                       <TableCell sx={{ fontWeight: 700 }}>메모리사용률</TableCell>
                       <TableCell sx={{ fontWeight: 700 }}>디스크사용률</TableCell>
                       <TableCell sx={{ fontWeight: 700 }}>점검일자</TableCell>
-                      <TableCell sx={{ fontWeight: 700, width: 120 }}>관리</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}></TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -96,18 +97,20 @@ const LogPage: React.FC = () => {
                         <TableCell>{l.memoryUsage ? `${l.memoryUsage}%` : "-"}</TableCell>
                         <TableCell>{l.diskUsage ? `${l.diskUsage}%` : "-"}</TableCell>
                         <TableCell>{l.checkDate ?? "-"}</TableCell>
-                        <TableCell>
-                          <Stack direction="row" spacing={1.2}>
-                            <Button
-                              size="small"
-                              variant="outlined"
-                              startIcon={<EditIcon />}
-                              onClick={() => handleEditClick(l.assetSerialNumber)}
-                            >
-                              수정
-                            </Button>
-                          </Stack>
-                        </TableCell>
+                        {isGuest ? <TableCell></TableCell> : (
+                          <TableCell>
+                            <Stack direction="row" spacing={1.2}>
+                              <Button
+                                size="small"
+                                variant="outlined"
+                                startIcon={<EditIcon />}
+                                onClick={() => handleEditClick(l.assetSerialNumber)}
+                              >
+                                수정
+                              </Button>
+                            </Stack>
+                          </TableCell>
+                        )}
                       </TableRow>
                     ))}
                   </TableBody>

@@ -91,7 +91,9 @@ const UpdateRoleModal: React.FC<UpdateRoleModalProps> = ({
                 setForm({ ...form, role: e.target.value })
               }
             >
-              {roles.map((c) => (
+              {roles
+              .filter((c) => c.roleId !== "admin")
+              .map((c) => (
                 <MenuItem key={c.roleId} value={c.roleId}>
                   {c.roleName}
                 </MenuItem>

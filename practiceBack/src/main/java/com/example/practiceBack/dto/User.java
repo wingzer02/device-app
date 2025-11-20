@@ -15,4 +15,5 @@ public class User {
     private String role;
     private String roleName;
     private boolean delFlg;
+    private boolean adminRequestFlg;
 }

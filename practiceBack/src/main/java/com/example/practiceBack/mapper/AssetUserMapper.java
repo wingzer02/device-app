@@ -1,0 +1,18 @@
+package com.example.practiceBack.mapper;
+
+import com.example.practiceBack.dto.User;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
+
+@Mapper
+public interface AssetUserMapper {
+    List<User> findUsersByAssetSerialNumber(@Param("assetSerialNumber") String assetSerialNumber);
+    void deleteByAssetSerialNumber(@Param("assetSerialNumber") String assetSerialNumber);
+    void insertAssetUser(
+            @Param("assetSerialNumber") String assetSerialNumber,
+            @Param("userid") String userid
+    );
+    void deleteByUserId(@Param("userid") String userid);
+}

@@ -36,7 +36,7 @@ public class DeviceService {
     // 장비 DB 삭제
     public void deleteDeviceBySerial(String serialNumber) {
         String assetSn = assetMapper.findAssetSnByDeviceSn(serialNumber);
-        if (!assetSn.isEmpty()) {
+        if (assetSn != null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, assetSn);
         }
         deviceMapper.deleteBySerialNumber(serialNumber);

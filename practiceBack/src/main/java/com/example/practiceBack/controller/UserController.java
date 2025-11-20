@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Map;
@@ -32,10 +33,12 @@ public class UserController {
 
     // 사용자 전체 조회(사용자 관리)
     @GetMapping("/admin")
-    public List<User> listAllUsersAdmin() {
+    public List<User> listAllUsersAdmin(@AuthenticationPrincipal User currentUser) {
+        if (currentUser == null || !"admin".equals(currentUser.getRole())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "관리자만 접근 가능합니다.");
+        }
         return userService.findAllAdminPage();
     }
-
 
     // 회원가입
     @PostMapping("/register")
@@ -126,6 +129,24 @@ public class UserController {
     @PostMapping("/update-role")
     public void updateRole(@RequestBody User user) {
         userService.updateRole(user);
+    }
+
+    // 관리자 권한 신청
+    @PostMapping("/request-admin/{userid}")
+    public void requestAdmin(@PathVariable String userid) {
+        userService.requestAdmin(userid);
+    }
+
+    // 관리자 신청 승인
+    @PostMapping("/approve-admin/{userid}")
+    public void approveAdmin(@PathVariable String userid) {
+        userService.approveAdmin(userid);
+    }
+
+    // 관리자 신청 취소
+    @PostMapping("/cancel-admin/{userid}")
+    public void cancelAdmin(@PathVariable String userid) {
+        userService.cancelAdmin(userid);
     }
 
     // 토큰 재발급

@@ -14,5 +14,4 @@ public interface AssetMapper {
     void insertAsset(Asset asset);
     void updateAsset(Asset asset);
     void deleteAsset(@Param("assetSerialNumber") String assetSerialNumber);
-    void clearUser(@Param("userid") String userid);
 }
