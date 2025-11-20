@@ -111,6 +111,32 @@ public class UserService {
         userMapper.updateRole(user);
     }
 
+    // 일반 사용자의 관리자 신청
+    public void requestAdmin(String userid) {
+        User user = new User();
+        user.setUserid(userid);
+        user.setAdminRequestFlg(true);
+        userMapper.updateAdminRequest(user);
+    }
+
+    // 관리자에 의한 승인
+    public void approveAdmin(String userid) {
+        User user = new User();
+        user.setUserid(userid);
+        user.setRole("admin");
+        userMapper.updateRole(user);
+        user.setAdminRequestFlg(false);
+        userMapper.updateAdminRequest(user);
+    }
+
+    // 관리자에 의한 신청 취소
+    public void cancelAdmin(String userid) {
+        User user = new User();
+        user.setUserid(userid);
+        user.setAdminRequestFlg(false);
+        userMapper.updateAdminRequest(user);
+    }
+
     // 프로필 이미지 업로드
     public String storeProfileImage(MultipartFile file, String userid) throws IOException {
         String uploadRoot = "C:/myapp/uploads";

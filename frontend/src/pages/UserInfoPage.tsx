@@ -12,7 +12,7 @@ import {
   Stack
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { fetchUserByUserid, updateUser } from "../store/userSlice";
+import { fetchUserByUserid, updateUser, requestAdmin } from "../store/userSlice";
 import { toUploadsUrl } from "../utils/url";
 
 const UserInfoPage: React.FC = () => {
@@ -72,6 +72,13 @@ const UserInfoPage: React.FC = () => {
     navigate("/devices");
   };
 
+  const handleRequestAdmin = async () => {
+    if (!window.confirm("관리자 승인을 신청하시겠습니까?")) return;
+    await dispatch(requestAdmin(profile.userid));
+    alert("관리자 승인 신청이 완료되었습니다.");
+    dispatch(fetchUserByUserid(profile.userid));
+  }
+
   return (
     <Box 
       component="form"
@@ -98,6 +105,27 @@ const UserInfoPage: React.FC = () => {
             <Typography variant="subtitle1" sx={{ fontSize: "1.125rem" }}>
               {profile.name}
             </Typography>
+          </Box>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2.5 }}>
+            <Typography variant="body1" color="text.secondary" sx={{ width: 104 }}>
+              권한
+            </Typography>
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", flex: 1 }}>
+              <Typography variant="subtitle1" sx={{ fontSize: "1.125rem" }}>
+                {profile.roleName}
+              </Typography>
+
+              {profile.role === "normal" && (
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={handleRequestAdmin}
+                  disabled={profile.adminRequestFlg}
+                >
+                  {profile.adminRequestFlg ? "승인 대기중" : "관리자신청"}
+                </Button>
+              )}
+            </Box>
           </Box>
         </Stack>
         <Stack spacing={2.5}>

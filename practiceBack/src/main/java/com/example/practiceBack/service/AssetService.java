@@ -32,7 +32,7 @@ public class AssetService {
     public void addAsset(Asset asset) {
         assetMapper.insertAsset(asset);
         int catId = deviceMapper.findCatIdBySerialNumber(asset.getDeviceSerialNumber());
-        if (catId == 2 ) {
+        if (catId == 2) {
             logMapper.insertLog(asset.getAssetSerialNumber());
         }
     }

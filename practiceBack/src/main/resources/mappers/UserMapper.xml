@@ -18,7 +18,8 @@
         u.email,
         u.del_flg,
         u.role,
-        r.role_name
+        r.role_name,
+        u.admin_request_flg
         FROM user u
         LEFT JOIN role r ON u.role = r.role_id;
     </select>
@@ -30,10 +31,12 @@
         u.email,
         u.del_flg,
         u.role,
-        r.role_name
+        r.role_name,
+        u.admin_request_flg
         FROM user u
         LEFT JOIN role r ON u.role = r.role_id
-        WHERE u.role != 'admin';
+        WHERE u.role != 'admin'
+        ORDER BY u.userid;
     </select>
 
     <select id="findByUserid" parameterType="string" resultType="com.example.practiceBack.dto.User">
@@ -45,7 +48,8 @@
         u.photo_url,
         u.refresh_token,
         u.role,
-        r.role_name
+        r.role_name,
+        u.admin_request_flg
         FROM user u
         LEFT JOIN role r ON u.role = r.role_id
         WHERE userid = #{userid}
@@ -84,4 +88,9 @@
         WHERE userid = #{userid};
     </update>
 
+    <update id="updateAdminRequest" parameterType="com.example.practiceBack.dto.User">
+        UPDATE user
+        SET admin_request_flg = #{adminRequestFlg}
+        WHERE userid = #{userid};
+    </update>
 </mapper>

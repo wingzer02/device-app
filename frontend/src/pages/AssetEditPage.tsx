@@ -11,11 +11,9 @@ import {
   MenuItem,
   Stack,
 } from "@mui/material";
-import { ERR_REGISTER_DATE } from "../utils/text";
+import { ERR_REGISTER_DATE, LOCATION_OPTIONS } from "../utils/text";
 import { Device, fetchDevices } from "../store/deviceSlice";
 import { fetchAllUsers, User } from "../store/userSlice";
-
-const locationOptions = ["A city", "B city", "C city", "D city"];
 
 const AssetEditPage: React.FC = () => {
   const navigate = useNavigate();
@@ -115,9 +113,10 @@ const AssetEditPage: React.FC = () => {
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             fullWidth
+            required
           >
             <MenuItem value="">선택</MenuItem>
-            {locationOptions.map((loc) => (
+            {LOCATION_OPTIONS.map((loc) => (
               <MenuItem key={loc} value={loc}>
                 {loc}
               </MenuItem>

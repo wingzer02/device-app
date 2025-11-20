@@ -13,9 +13,7 @@ import {
   MenuItem,
   Stack,
 } from "@mui/material";
-import { ERR_REGISTER_DATE } from "../utils/text";
-
-const locationOptions = ["A city", "B city", "C city", "D city"];
+import { ERR_REGISTER_DATE, LOCATION_OPTIONS } from "../utils/text";
 
 const AssetRegisterPage: React.FC = () => {
   const navigate = useNavigate();
@@ -108,7 +106,7 @@ const AssetRegisterPage: React.FC = () => {
             required
           >
             <MenuItem value="">선택</MenuItem>
-            {locationOptions.map((loc) => (
+            {LOCATION_OPTIONS.map((loc) => (
               <MenuItem key={loc} value={loc}>
                 {loc}
               </MenuItem>

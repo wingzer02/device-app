@@ -53,6 +53,7 @@ const AssetPage: React.FC = () => {
 
   const userName = profile.name ? profile.name : USER_NAME_NULL;
   const photoSrc = toUploadsUrl(profile.photoUrl) || NO_PHOTO_URL;
+  const isGuest = profile.role === "guest";
 
   useEffect(() => {
     dispatch(fetchAssets());
@@ -122,24 +123,25 @@ const AssetPage: React.FC = () => {
         <Box sx={{ display: "flex" }}>
           <CommonSidebar />
           <Container maxWidth="lg" sx={{ py: 3 }}>
-            <Paper
-              elevation={0}
-              sx={{
-                p: 2,
-                mb: 2,
-                borderRadius: 3,
-                border: (t) => `1px solid ${t.palette.divider}`,
-              }}
-            >
-              <Stack direction="row" justifyContent="flex-end" alignItems="center">
-                <Box sx={{ display: "inline-flex", gap: 1 }}>
-                  <Button variant="contained" onClick={handleAssetRegister}>
-                    자산등록
-                  </Button>
-                </Box>
-              </Stack>
-            </Paper>
-
+            {!isGuest && (
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 2,
+                  mb: 2,
+                  borderRadius: 3,
+                  border: (t) => `1px solid ${t.palette.divider}`,
+                }}
+              >
+                <Stack direction="row" justifyContent="flex-end" alignItems="center">
+                  <Box sx={{ display: "inline-flex", gap: 1 }}>
+                    <Button variant="contained" onClick={handleAssetRegister}>
+                      자산등록
+                    </Button>
+                  </Box>
+                </Stack>
+              </Paper>
+            )}
             <Paper
               elevation={0}
               sx={{
@@ -160,7 +162,7 @@ const AssetPage: React.FC = () => {
                       <TableCell sx={{ fontWeight: 700 }}>사용자명</TableCell>
                       <TableCell sx={{ fontWeight: 700 }}>사용시작일</TableCell>
                       <TableCell sx={{ fontWeight: 700 }}>사용종료일</TableCell>
-                      <TableCell sx={{ fontWeight: 700, width: 220 }}>관리</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}></TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -191,28 +193,30 @@ const AssetPage: React.FC = () => {
                           <TableCell>{a.userName ?? "-"}</TableCell>
                           <TableCell>{a.startDate ?? "-"}</TableCell>
                           <TableCell>{a.endDate ?? "-"}</TableCell>
-                          <TableCell>
-                            <Stack direction="row" spacing={1.2}>
-                              <Button
-                                size="small"
-                                variant="outlined"
-                                startIcon={<EditIcon />}
-                                component={RouterLink}
-                                to={`/assets/${a.assetSerialNumber}/edit`}
-                              >
-                                수정
-                              </Button>
-                              <Button
-                                size="small"
-                                color="error"
-                                variant="text"
-                                startIcon={<DeleteOutlineIcon />}
-                                onClick={() => handleDeleteClick(a.assetSerialNumber)}
-                              >
-                                삭제
-                              </Button>
-                            </Stack>
-                          </TableCell>
+                          {isGuest ? <TableCell></TableCell> : (
+                            <TableCell>
+                              <Stack direction="row" spacing={1.2}>
+                                <Button
+                                  size="small"
+                                  variant="outlined"
+                                  startIcon={<EditIcon />}
+                                  component={RouterLink}
+                                  to={`/assets/${a.assetSerialNumber}/edit`}
+                                >
+                                  수정
+                                </Button>
+                                <Button
+                                  size="small"
+                                  color="error"
+                                  variant="text"
+                                  startIcon={<DeleteOutlineIcon />}
+                                  onClick={() => handleDeleteClick(a.assetSerialNumber)}
+                                >
+                                  삭제
+                                </Button>
+                              </Stack>
+                            </TableCell>
+                          )}
                         </TableRow>
                       );
                     })}

@@ -5,7 +5,6 @@ import { deleteDevice, Device, fetchDevices } from "../store/deviceSlice";
 import { logoutUser  } from "../store/userSlice";
 import { useNavigate } from "react-router-dom";
 import { 
-  Typography,
   Box,
   Container,
   Paper,
@@ -28,7 +27,6 @@ import { toUploadsUrl } from "../utils/url";
 import { 
   USER_NAME_NULL,
   NO_PHOTO_URL,
-  WARNING_GUEST,
 } from "../utils/text";
 import CommonSidebar from "../components/CommonSidebar";
 import CommonHeader from "../components/CommonHeader";
@@ -177,27 +175,23 @@ const DevicePage: React.FC = () => {
         <Box sx={{ display: "flex" }}>
           <CommonSidebar />
           <Container maxWidth="lg" sx={{ py: 3 }}>
-            <Paper
-              elevation={0}
-              sx={{
-                p: 2,
-                mb: 2,
-                borderRadius: 3,
-                border: (t) => `1px solid ${t.palette.divider}`,
-              }}
-            >
-              {isGuest ? (
-                <Typography variant="body2" color="warning">
-                  {WARNING_GUEST}
-                </Typography> 
-              ) : (
+            {!isGuest && (
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 2,
+                  mb: 2,
+                  borderRadius: 3,
+                  border: (t) => `1px solid ${t.palette.divider}`,
+                }}
+              >
                 <Stack direction="row" justifyContent="flex-end" alignItems="center">
                   <Box sx={{ display: "inline-flex", gap: 1 }}>
                     <Button variant="contained" onClick={() => setOpen(true)}>장비등록</Button> 
                   </Box>
                 </Stack>
-              )}
-            </Paper>
+              </Paper>
+            )}
             <Paper
               elevation={0}
               sx={{
@@ -210,30 +204,30 @@ const DevicePage: React.FC = () => {
                 <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell sx={{ fontWeight: 700, width: 160 }}>일련번호</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>일련번호</TableCell>
                       <TableCell 
-                        sx={{ fontWeight: 700, width: 160, cursor: "pointer" }}
+                        sx={{ fontWeight: 700, cursor: "pointer" }}
                         onClick={() => handleSort("catName")}
                       >
                         분류{sortKey === "catName" ? (sortDirection === "asc" ? " ▲" : " ▼") : ""}
                       </TableCell>
                       <TableCell 
-                        sx={{ fontWeight: 700, width: 160 }}
+                        sx={{ fontWeight: 700 }}
                       >
                         장비명
                       </TableCell>
                       <TableCell 
-                        sx={{ fontWeight: 700, width: 160 }}
+                        sx={{ fontWeight: 700 }}
                       >
                         제조사
                       </TableCell>
                       <TableCell 
-                        sx={{ fontWeight: 700, width: 160, cursor: "pointer" }}
+                        sx={{ fontWeight: 700, cursor: "pointer" }}
                         onClick={() => handleSort("purchaseDate")}
                       >
                         구입일자{sortKey === "purchaseDate" ? (sortDirection === "asc" ? " ▲" : " ▼") : ""}
                       </TableCell>
-                      <TableCell sx={{ fontWeight: 700, width: 140 }}></TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}></TableCell>
                     </TableRow>
                   </TableHead>
 
