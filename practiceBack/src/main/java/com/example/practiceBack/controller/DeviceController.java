@@ -2,6 +2,7 @@ package com.example.practiceBack.controller;
 
 import com.example.practiceBack.dto.Device;
 import com.example.practiceBack.service.DeviceService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,7 +24,7 @@ public class DeviceController {
 
     // 장비 추가
     @PostMapping
-    public void addDevice(@RequestBody Device device) {
+    public void addDevice(@Valid @RequestBody Device device) {
         deviceService.addDevice(device);
     }
 

@@ -2,7 +2,6 @@ package com.example.practiceBack.service;
 
 import com.example.practiceBack.dto.User;
 import com.example.practiceBack.dto.LoginRequest;
-import com.example.practiceBack.mapper.AssetMapper;
 import com.example.practiceBack.mapper.AssetUserMapper;
 import com.example.practiceBack.mapper.UserMapper;
 import com.example.practiceBack.security.JwtUtil;

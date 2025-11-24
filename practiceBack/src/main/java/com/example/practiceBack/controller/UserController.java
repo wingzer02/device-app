@@ -4,6 +4,7 @@ import com.example.practiceBack.dto.User;
 import com.example.practiceBack.dto.LoginRequest;
 import com.example.practiceBack.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -42,14 +43,14 @@ public class UserController {
 
     // 회원가입
     @PostMapping("/register")
-    public void insert(@RequestBody User user) {
+    public void insert(@Valid @RequestBody User user) {
         userService.register(user);
     }
 
     // 로그인
     @PostMapping("/login")
     public ResponseEntity<Void> login(
-            @RequestBody LoginRequest req,
+            @Valid @RequestBody LoginRequest req,
             HttpServletResponse response
     ) {
         Map<String, String> tokens = userService.login(req);

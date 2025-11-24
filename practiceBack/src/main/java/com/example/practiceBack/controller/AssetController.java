@@ -3,6 +3,7 @@ package com.example.practiceBack.controller;
 import com.example.practiceBack.dto.Asset;
 import com.example.practiceBack.dto.PageResponse;
 import com.example.practiceBack.service.AssetService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -41,7 +42,7 @@ public class AssetController {
 
     // 자산 등록
     @PostMapping
-    public void addAsset(@RequestBody Asset asset) {
+    public void addAsset(@Valid @RequestBody Asset asset) {
         assetService.addAsset(asset);
     }
 
@@ -49,7 +50,7 @@ public class AssetController {
     @PutMapping("/{assetSerialNumber}")
     public void updateAsset(
         @PathVariable String assetSerialNumber,
-        @RequestBody Asset asset
+        @Valid @RequestBody Asset asset
     ) {
         asset.setAssetSerialNumber(assetSerialNumber);
         assetService.updateAsset(asset);

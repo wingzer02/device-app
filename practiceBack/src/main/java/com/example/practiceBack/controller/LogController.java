@@ -2,6 +2,7 @@ package com.example.practiceBack.controller;
 
 import com.example.practiceBack.dto.Log;
 import com.example.practiceBack.service.LogService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,7 +31,7 @@ public class LogController {
 
     // 로그 갱신
     @PutMapping("/{assetSerialNumber}")
-    public void updateLog(@PathVariable String assetSerialNumber, @RequestBody Log log) {
+    public void updateLog(@PathVariable String assetSerialNumber, @Valid @RequestBody Log log) {
         log.setAssetSerialNumber(assetSerialNumber);
         logService.updateLog(log);
     }
