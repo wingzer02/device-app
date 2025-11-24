@@ -23,6 +23,7 @@ const RegisterPage: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
+  // 회원가입 버튼 클릭
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {

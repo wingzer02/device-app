@@ -60,14 +60,14 @@ public class UserController {
         ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
                 .httpOnly(true)
                 .path("/")
-                .maxAge(10 * 60)
+                .maxAge(60 * 10)
                 .build();
 
         // refresh token 쿠키
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
                 .path("/")
-                .maxAge(7 * 24 * 60 * 60)
+                .maxAge(60 * 60)
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
@@ -166,14 +166,14 @@ public class UserController {
         ResponseCookie accessCookie = ResponseCookie.from("accessToken", newAccess)
                 .httpOnly(true)
                 .path("/")
-                .maxAge(10 * 60)
+                .maxAge(60 * 10)
                 .sameSite("Lax")
                 .build();
 
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", newRefresh)
                 .httpOnly(true)
                 .path("/")
-                .maxAge(7 * 24 * 60 * 60)
+                .maxAge(60 * 60)
                 .sameSite("Lax")
                 .build();
 

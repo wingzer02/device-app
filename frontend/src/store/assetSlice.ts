@@ -15,9 +15,32 @@ export interface Asset {
   endDate?: string;
 }
 
+export interface PageResponse<T> {
+  items: T[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+}
+
+export interface AssetPageParams {
+  page: number;
+  size: number;
+  sortKey: string;
+  sortDir: string;
+}
+
 interface AssetState {
   list: Asset[];
   asset: Asset;
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
 }
 
 const initialState: AssetState = {
@@ -33,6 +56,12 @@ const initialState: AssetState = {
     startDate: "",
     endDate: "",
   },
+  page: 1,
+  size: 10,
+  totalElements: 0,
+  totalPages: 1,
+  hasNext: false,
+  hasPrev: false,
 };
 
 /**
@@ -41,7 +70,18 @@ const initialState: AssetState = {
 export const fetchAssets = createAsyncThunk(
   "asset/fetchAssets",
   async () => {
-    const res = await axios.get<Asset[]>(API_BASE_URL);
+    const res = await axios.get<Asset[]>(`${API_BASE_URL}/all`);
+    return res.data;
+  }
+);
+
+export const fetchAssetsPage = createAsyncThunk(
+  "asset/fetchAssetsPage",
+  async (params: AssetPageParams) => {
+    const { page = 1, size = 10, sortKey = "", sortDir = "asc" } = params;
+    const res = await axios.get<PageResponse<Asset>>(API_BASE_URL, {
+      params: { page, size, sortKey, sortDir },
+    });
     return res.data;
   }
 );
@@ -101,6 +141,25 @@ const assetSlice = createSlice({
       })
       .addCase(fetchAssets.rejected, (state) => {
         state.list = [];
+      })
+
+      .addCase(fetchAssetsPage.fulfilled, (state, action) => {
+        const p = action.payload;
+        state.list = p.items;
+        state.page = p.page;
+        state.size = p.size;
+        state.totalElements = p.totalElements;
+        state.totalPages = p.totalPages;
+        state.hasNext = p.hasNext;
+        state.hasPrev = p.hasPrev;
+      })
+      .addCase(fetchAssetsPage.rejected, (state) => {
+        state.list = [];
+        state.page = 1;
+        state.totalElements = 0;
+        state.totalPages = 1;
+        state.hasNext = false;
+        state.hasPrev = false;
       })
 
       .addCase(fetchAssetBySerialNumber.fulfilled, (state, action) => {

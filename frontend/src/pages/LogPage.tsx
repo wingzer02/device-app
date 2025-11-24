@@ -46,6 +46,7 @@ const LogPage: React.FC = () => {
     navigate("/");
   };
 
+  // 수정 버튼 클릭
   const handleEditClick = (assetSerialNumber: string) => {
     navigate(`/logs/${assetSerialNumber}/edit`);
   };

@@ -28,6 +28,7 @@ const UserInfoPage: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState("");
 
+  // 회원 정보 조회
   useEffect(() => {
     if (!profile.userid || status !== "succeeded") return;
     dispatch(fetchUserByUserid(profile.userid));
@@ -72,6 +73,7 @@ const UserInfoPage: React.FC = () => {
     navigate("/devices");
   };
 
+  // 관리자 신청 버튼 클릭
   const handleRequestAdmin = async () => {
     if (!window.confirm("관리자 승인을 신청하시겠습니까?")) return;
     await dispatch(requestAdmin(profile.userid));

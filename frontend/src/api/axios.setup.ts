@@ -9,8 +9,10 @@ interface RetryableRequestConfig extends InternalAxiosRequestConfig {
 
 const USER_API_BASE = "http://localhost:8080/api/user";
 
+// 백엔드와 쿠키 기반 인증을 사용할 것이므로 withCredentials 항상 true 로 설정
 axios.defaults.withCredentials = true;
 
+// 요청 인터셉터
 axios.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => config,
   (error: AxiosError) => Promise.reject(error)
@@ -59,7 +61,8 @@ axios.interceptors.response.use(
       }
     }
 
-    if (status === 401 || status === 403) {
+    // 2) 인증 API 에서 403 이 뜨면 → 클라이언트만 로그아웃
+    if (status === 403) {
       store.dispatch(logout());
     }
 

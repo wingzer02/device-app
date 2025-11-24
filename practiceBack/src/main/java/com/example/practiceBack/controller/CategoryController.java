@@ -18,6 +18,7 @@ public class CategoryController {
         this.categoryService = categoryService;
     }
 
+    // 장비 분류 전체 조회
     @GetMapping
     public List<Category> getAll() {
         return categoryService.getAll();

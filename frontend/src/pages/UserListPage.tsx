@@ -59,17 +59,20 @@ const UserListPage: React.FC = () => {
     dispatch(fetchAllUsersAdminPage());
   };
 
+  // 권한변경 모달 오픈
   const handleOpenUpdateRole = (u: User) => {
     setSelectedUser(u);
     setOpen(true);
   };
 
+  // 관리자 승인 버튼 클릭
   const handleApproveClick = async (userid: string) => {
     if (!window.confirm("관리자 승인을 하시겠습니까?")) return;
     await dispatch(approveAdmin(userid));
     dispatch(fetchAllUsersAdminPage());
   };
 
+  // 관리자 신청 취소 버튼 클릭
   const handleCancelClick = async (userid: string) => {
     if (!window.confirm("관리자 신청을 취소하시겠습니까?")) return;
     await dispatch(cancelAdmin(userid));
@@ -85,127 +88,130 @@ const UserListPage: React.FC = () => {
         onLogout={handleLogout}
         isAuthenticated={isAuthenticated}
       />
-      <Box sx={{ display: "flex" }}>
-        <CommonSidebar />
-        <Container maxWidth="lg" sx={{ py: 3 }}>
-          <Paper
-            elevation={0}
-            sx={{
-              overflow: "hidden",
-              borderRadius: 3,
-              border: (t) => `1px solid ${t.palette.divider}`,
-            }}
-          >
-            <Box sx={{ p: 2, display: "flex", justifyContent: "center" }}>
-              <TextField
-                size="small"
-                label="이름 검색"
-                value={searchName}
-                onChange={(e) => setSearchName(e.target.value)}
-              />
-            </Box>
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell 
-                      sx={{ fontWeight: 700 }}
-                    >
-                      아이디
-                    </TableCell>
-                    <TableCell 
-                      sx={{ fontWeight: 700 }}
-                    >
-                      이름
-                    </TableCell>
-                    <TableCell 
-                      sx={{ fontWeight: 700 }}
-                    >
-                      이메일
-                    </TableCell>
-                    <TableCell 
-                      sx={{ fontWeight: 700 }}
-                    >
-                      권한
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}></TableCell>
-                  </TableRow>
-                </TableHead>
-
-                <TableBody>
-                  {filteredList.length === 0 ? (
+      {isAuthenticated && (
+        <Box sx={{ display: "flex" }}>
+          <CommonSidebar />
+          <Container maxWidth="lg" sx={{ py: 3 }}>
+            <Paper
+              elevation={0}
+              sx={{
+                overflow: "hidden",
+                borderRadius: 3,
+                border: (t) => `1px solid ${t.palette.divider}`,
+              }}
+            >
+              <Box sx={{ p: 2, display: "flex", justifyContent: "center" }}>
+                <TextField
+                  size="small"
+                  label="이름 검색"
+                  value={searchName}
+                  onChange={(e) => setSearchName(e.target.value)}
+                />
+              </Box>
+              <TableContainer>
+                <Table>
+                  <TableHead>
                     <TableRow>
-                      <TableCell colSpan={5} align="center">
-                        검색 결과가 없습니다.
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    filteredList.map((u: User) => (
-                      <TableRow 
-                        key={u.userid}
-                        hover
-                        sx={
-                          u.delFlg
-                          ? (t) => ({
-                            backgroundColor: t.palette.action.hover,
-                            "& .MuiTableCell-root": { color: t.palette.text.disabled },
-                          }) : null
-                        }
+                      <TableCell 
+                        sx={{ fontWeight: 700 }}
                       >
-                        <TableCell>{u.userid}</TableCell>
-                        <TableCell>{u.name}</TableCell>
-                        <TableCell>{u.email}</TableCell>
-                        <TableCell>{u.roleName}</TableCell>
-                        <TableCell>
-                          {u.delFlg ? null :(
-                            <Stack direction="column" spacing={0.5} alignItems="flex-start">
-                              {u.role == "normal" && (
-                                <>
-                                <Button
-                                  size="small"
-                                  variant="text"
-                                  onClick={() => handleApproveClick(u.userid)}
-                                  disabled={!u.adminRequestFlg}
-                                >
-                                  승인
-                                </Button>
-                                <Button
-                                  size="small"
-                                  variant="text"
-                                  onClick={() => handleCancelClick(u.userid)}
-                                  disabled={!u.adminRequestFlg}
-                                >
-                                  취소
-                                </Button>
-                                </>
-                              )}
-                              <Button
-                                size="small"
-                                variant="text"
-                                onClick={() => handleOpenUpdateRole(u)}
-                              >
-                                권한변경
-                              </Button>
-                              <Button
-                                size="small"
-                                color="error"
-                                variant="text"
-                                onClick={() => handleDeleteClick(u.userid)}
-                              >
-                                회원탈퇴
-                              </Button>
-                            </Stack>
-                          )}
+                        아이디
+                      </TableCell>
+                      <TableCell 
+                        sx={{ fontWeight: 700 }}
+                      >
+                        이름
+                      </TableCell>
+                      <TableCell 
+                        sx={{ fontWeight: 700 }}
+                      >
+                        이메일
+                      </TableCell>
+                      <TableCell 
+                        sx={{ fontWeight: 700 }}
+                      >
+                        권한
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}></TableCell>
+                    </TableRow>
+                  </TableHead>
+
+                  <TableBody>
+                    {filteredList.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={5} align="center">
+                          검색 결과가 없습니다.
                         </TableCell>
                       </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Paper>
-        </Container>
-      </Box>
+                    ) : (
+                      filteredList.map((u: User) => (
+                        <TableRow 
+                          key={u.userid}
+                          hover
+                          sx={
+                            // 삭제된 사용자는 회색 처리
+                            u.delFlg
+                            ? (t) => ({
+                              backgroundColor: t.palette.action.hover,
+                              "& .MuiTableCell-root": { color: t.palette.text.disabled },
+                            }) : null
+                          }
+                        >
+                          <TableCell>{u.userid}</TableCell>
+                          <TableCell>{u.name}</TableCell>
+                          <TableCell>{u.email}</TableCell>
+                          <TableCell>{u.roleName}</TableCell>
+                          <TableCell>
+                            {u.delFlg ? null :(
+                              <Stack direction="column" spacing={0.5} alignItems="flex-start">
+                                {u.role === "normal" && (
+                                  <>
+                                  <Button
+                                    size="small"
+                                    variant="text"
+                                    onClick={() => handleApproveClick(u.userid)}
+                                    disabled={!u.adminRequestFlg}
+                                  >
+                                    승인
+                                  </Button>
+                                  <Button
+                                    size="small"
+                                    variant="text"
+                                    onClick={() => handleCancelClick(u.userid)}
+                                    disabled={!u.adminRequestFlg}
+                                  >
+                                    취소
+                                  </Button>
+                                  </>
+                                )}
+                                <Button
+                                  size="small"
+                                  variant="text"
+                                  onClick={() => handleOpenUpdateRole(u)}
+                                >
+                                  권한변경
+                                </Button>
+                                <Button
+                                  size="small"
+                                  color="error"
+                                  variant="text"
+                                  onClick={() => handleDeleteClick(u.userid)}
+                                >
+                                  회원탈퇴
+                                </Button>
+                              </Stack>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Paper>
+          </Container>
+        </Box>
+      )}
       {selectedUser ? (
         <UpdateRoleModal
           open={open}

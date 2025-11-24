@@ -49,6 +49,7 @@ const UpdateRoleModal: React.FC<UpdateRoleModalProps> = ({
     }
   }, [dispatch, open, user]);
 
+  // 등록 버튼 클릭
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -58,6 +59,7 @@ const UpdateRoleModal: React.FC<UpdateRoleModalProps> = ({
     onSuccess();
   }
 
+  // 취소 버튼 클릭
   const handleCancel = () => {
     onClose();
   };

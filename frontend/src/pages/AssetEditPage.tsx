@@ -34,19 +34,24 @@ const AssetEditPage: React.FC = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
+  // 자산, 장비, 사용자 정보 조회
   useEffect(() => {
     dispatch(fetchDevices());
     dispatch(fetchAssets());
     dispatch(fetchAllUsers());
   }, [dispatch]);
 
+  // 편집할 자산 정보 조회
   useEffect(() => {
     if (!assetSerialNumber) return;
     dispatch(fetchAssetBySerialNumber(assetSerialNumber));
   }, [dispatch, assetSerialNumber]);
 
   useEffect(() => {
+    // asset이 비어있을 때 방어 코드
     if (!asset || !asset.assetSerialNumber) return;
+    // 현재 편집중인 자산이 아닐 때 방어 코드
+    if (asset.assetSerialNumber !== assetSerialNumber) return;
 
     setAssetName(asset.assetName);
     setDeviceSerialNumber(asset.deviceSerialNumber);
@@ -59,12 +64,14 @@ const AssetEditPage: React.FC = () => {
     } else {
       setUserIds([""]);
     }
-  }, [asset]);
+  }, [asset, assetSerialNumber]);
 
+  // 취소 버튼 클릭
   const handleCancel = () => {
     navigate("/assets");
   };
 
+  // 저장 버튼 클릭
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (startDate && endDate && startDate > endDate) {
@@ -73,6 +80,7 @@ const AssetEditPage: React.FC = () => {
     }
 
     const selectedUsers = userIds
+      // 빈 값은 제외    
       .filter((id) => id)
       .map((id) => users.find((u: User) => u.userid === id))
       .filter((u): u is User => !!u);
@@ -93,6 +101,7 @@ const AssetEditPage: React.FC = () => {
     navigate("/assets");
   };
   
+  // 사용자 선택 변경
   const handleChangeUser = (index: number, value: string) => {
     setUserIds((prev) => {
       const copy = [...prev];
@@ -101,6 +110,7 @@ const AssetEditPage: React.FC = () => {
     });
   };
 
+  // 사용자 추가
   const handleAddUser = () => {
     setUserIds((prev) => {
       return [...prev, ""];
@@ -191,6 +201,7 @@ const AssetEditPage: React.FC = () => {
               {users
                 .filter((u: User) => !u.delFlg)
                 .map((u: User) => {
+                  // 이미 선택된 사용자는 선택 불가
                   const alreadySelected = userIds.some((selectedId, i) => selectedId === u.userid && i !== index);
                   return (
                     <MenuItem 

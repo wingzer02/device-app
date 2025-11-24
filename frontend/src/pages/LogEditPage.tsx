@@ -35,6 +35,7 @@ const LogEditPage: React.FC = () => {
     }
   );
 
+  // 로그 정보 조회
   useEffect(() => {
     if (assetSerialNumber) {
       dispatch(fetchLogByAssetSerialNumber(assetSerialNumber));
@@ -51,6 +52,7 @@ const LogEditPage: React.FC = () => {
     });
   }, [log]);
 
+  // 저장 버튼 클릭
   const handleSubmit = async () => {
     if (!form) return;
     if (isNaN(Number(form.cpuUsage))
@@ -69,6 +71,7 @@ const LogEditPage: React.FC = () => {
     navigate("/logs");
   };
 
+  // 취소 버튼 클릭
   const handleCancel = () => {
     navigate("/logs");
   };

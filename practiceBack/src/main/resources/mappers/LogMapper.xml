@@ -7,14 +7,14 @@
 
     <select id="findAll" resultType="com.example.practiceBack.dto.Log">
         SELECT
-        l.asset_serial_number,
-        a.asset_name,
-        a.device_serial_number,
-        d.device_name,
-        l.cpu_usage,
-        l.memory_usage,
-        l.disk_usage,
-        l.check_date
+            l.asset_serial_number,
+            a.asset_name,
+            a.device_serial_number,
+            d.device_name,
+            l.cpu_usage,
+            l.memory_usage,
+            l.disk_usage,
+            l.check_date
         FROM log l
         LEFT JOIN asset a
         ON a.asset_serial_number = l.asset_serial_number
@@ -26,14 +26,14 @@
             parameterType="string"
             resultType="com.example.practiceBack.dto.Log">
         SELECT
-        l.asset_serial_number,
-        a.asset_name,
-        a.device_serial_number,
-        d.device_name,
-        l.cpu_usage,
-        l.memory_usage,
-        l.disk_usage,
-        l.check_date
+            l.asset_serial_number,
+            a.asset_name,
+            a.device_serial_number,
+            d.device_name,
+            l.cpu_usage,
+            l.memory_usage,
+            l.disk_usage,
+            l.check_date
         FROM log l
         LEFT JOIN asset a
         ON a.asset_serial_number = l.asset_serial_number
@@ -45,10 +45,10 @@
     <update id="updateLog" parameterType="com.example.practiceBack.dto.Log">
         UPDATE log
         SET
-        cpu_usage    = #{cpuUsage},
-        memory_usage = #{memoryUsage},
-        disk_usage   = #{diskUsage},
-        check_date   = #{checkDate}
+            cpu_usage    = #{cpuUsage},
+            memory_usage = #{memoryUsage},
+            disk_usage   = #{diskUsage},
+            check_date   = #{checkDate}
         WHERE asset_serial_number = #{assetSerialNumber}
     </update>
 

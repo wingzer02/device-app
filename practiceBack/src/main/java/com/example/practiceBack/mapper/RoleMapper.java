@@ -7,5 +7,6 @@ import java.util.List;
 
 @Mapper
 public interface RoleMapper {
+    // 권한 전체 조회
     List<Role> findAll();
 }

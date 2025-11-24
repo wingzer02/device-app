@@ -33,12 +33,14 @@ const AssetRegisterPage: React.FC = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
+  // 자산, 장비, 사용자 정보 조회
   useEffect(() => {
     dispatch(fetchDevices());
     dispatch(fetchAllUsers());
     dispatch(fetchAssets());
   }, [dispatch]);
 
+  // 자산 등록 버튼 클릭
   const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -66,14 +68,15 @@ const AssetRegisterPage: React.FC = () => {
 
     await dispatch(addAsset(newAsset)).unwrap();
     alert("자산 등록이 완료되었습니다.");
-    await dispatch(fetchAssets());
     navigate("/assets");
   };
 
+  // 취소 버튼 클릭
   const handleCancel = () => {
     navigate("/assets");
   };
 
+  // 사용자 선택 변경
   const handleChangeUser = (index: number, value: string) => {
     setUserIds((prev) => {
       const copy = [...prev];
@@ -82,6 +85,7 @@ const AssetRegisterPage: React.FC = () => {
     });
   };
 
+  // 사용자 추가
   const handleAddUser = () => {
     setUserIds((prev) => {
       return [...prev, ""];
@@ -144,6 +148,7 @@ const AssetRegisterPage: React.FC = () => {
             {devices
               .filter(
                 (d: Device) =>
+                  // 이미 자산에 등록된 장비는 제외
                   !assets.some(
                     (a: Asset) => a.deviceSerialNumber === d.serialNumber
                   )
@@ -168,6 +173,7 @@ const AssetRegisterPage: React.FC = () => {
               {users
                 .filter((u: User) => !u.delFlg)
                 .map((u: User) => {
+                  // 이미 선택된 사용자는 선택 불가
                   const alreadySelected = userIds.some((selectedId, i) => selectedId === u.userid && i !== index);
                   return (
                     <MenuItem 

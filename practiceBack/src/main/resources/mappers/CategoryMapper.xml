@@ -5,8 +5,8 @@
 
     <select id="findAll" resultType="com.example.practiceBack.dto.Category">
         SELECT
-        cat_id,
-        cat_name
+            cat_id,
+            cat_name
         FROM category
         ORDER BY cat_id
     </select>

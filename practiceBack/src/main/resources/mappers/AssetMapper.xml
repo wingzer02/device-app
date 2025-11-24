@@ -8,32 +8,53 @@
     <!-- 자산 전체 조회 -->
     <select id="findAll" resultType="com.example.practiceBack.dto.Asset">
         SELECT
-        a.asset_serial_number,
-        a.asset_name,
-        a.location,
-        a.device_serial_number,
-        d.device_name,
-        a.start_date,
-        a.end_date
+            a.asset_serial_number,
+            a.asset_name,
+            a.location,
+            a.device_serial_number,
+            d.device_name,
+            a.start_date,
+            a.end_date
         FROM asset a
-        LEFT JOIN device d ON d.serial_number = a.device_serial_number
+        JOIN device d ON d.serial_number = a.device_serial_number
+    </select>
+
+    <select id="findPage" resultType="com.example.practiceBack.dto.Asset">
+        SELECT
+            a.asset_serial_number,
+            a.asset_name,
+            a.location,
+            a.device_serial_number,
+            d.device_name,
+            a.start_date,
+            a.end_date
+        FROM asset a
+        JOIN device d ON d.serial_number = a.device_serial_number
+        ORDER BY ${sortColumn} ${sortDir}
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countAll" resultType="int">
+        SELECT COUNT(*)
+        FROM asset a
+        JOIN device d ON d.serial_number = a.device_serial_number
     </select>
 
     <select id="findBySerialNumber" parameterType="string" resultType="com.example.practiceBack.dto.Asset">
         SELECT
-        a.asset_serial_number,
-        a.asset_name,
-        a.location,
-        a.device_serial_number,
-        a.start_date,
-        a.end_date
+            a.asset_serial_number,
+            a.asset_name,
+            a.location,
+            a.device_serial_number,
+            a.start_date,
+            a.end_date
         FROM asset a
         WHERE a.asset_serial_number = #{assetSerialNumber}
     </select>
 
     <select id="findAssetSnByDeviceSn" parameterType="string" resultType="string">
         SELECT
-        asset_serial_number
+            asset_serial_number
         FROM asset
         WHERE device_serial_number = #{deviceSerialNumber}
     </select>
@@ -41,30 +62,30 @@
     <!-- 자산 등록 -->
     <insert id="insertAsset" parameterType="com.example.practiceBack.dto.Asset">
         INSERT INTO asset (
-        asset_serial_number,
-        asset_name,
-        location,
-        device_serial_number,
-        start_date,
-        end_date
+            asset_serial_number,
+            asset_name,
+            location,
+            device_serial_number,
+            start_date,
+            end_date
         ) VALUES (
-        #{assetSerialNumber},
-        #{assetName},
-        #{location},
-        #{deviceSerialNumber},
-        #{startDate},
-        #{endDate}
+            #{assetSerialNumber},
+            #{assetName},
+            #{location},
+            #{deviceSerialNumber},
+            #{startDate},
+            #{endDate}
         );
     </insert>
 
     <update id="updateAsset" parameterType="com.example.practiceBack.dto.Asset">
         UPDATE asset
         SET
-        asset_name = #{assetName},
-        location = #{location},
-        device_serial_number = #{deviceSerialNumber},
-        start_date = #{startDate},
-        end_date = #{endDate}
+            asset_name = #{assetName},
+            location = #{location},
+            device_serial_number = #{deviceSerialNumber},
+            start_date = #{startDate},
+            end_date = #{endDate}
         WHERE asset_serial_number = #{assetSerialNumber}
     </update>
 

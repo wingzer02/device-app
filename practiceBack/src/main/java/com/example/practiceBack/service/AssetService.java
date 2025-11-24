@@ -1,6 +1,7 @@
 package com.example.practiceBack.service;
 
 import com.example.practiceBack.dto.Asset;
+import com.example.practiceBack.dto.PageResponse;
 import com.example.practiceBack.dto.User;
 import com.example.practiceBack.mapper.AssetMapper;
 import com.example.practiceBack.mapper.AssetUserMapper;
@@ -36,6 +37,33 @@ public class AssetService {
             fillUsers(asset);
         }
         return list;
+    }
+
+    public PageResponse<Asset> getAssetsPage(int page, int size, String sortKey, String sortDir) {
+        int offset = (page - 1) * size;
+        long totalElements = assetMapper.countAll();
+        int totalPages = (int) Math.ceil((double) totalElements / size);
+
+        String sortColumn;
+        if ("location".equals(sortKey)) {
+            sortColumn = "a.location";
+        } else if ("startDate".equals(sortKey)) {
+            sortColumn = "a.start_date";
+        } else if ("endDate".equals(sortKey)) {
+            sortColumn = "a.end_date";
+        } else {
+            sortColumn = "a.asset_serial_number";
+        }
+
+        List<Asset> items = assetMapper.findPage(offset, size, sortColumn, sortDir);
+        for (Asset asset : items) {
+            fillUsers(asset);
+        }
+
+        boolean hasNext = page < totalPages;
+        boolean hasPrev = page > 1;
+
+        return new PageResponse<>(items, page, size, totalElements, totalPages, hasNext, hasPrev);
     }
 
     public Asset getAsset(String assetSerialNumber) {
