@@ -9,8 +9,10 @@ import java.util.List;
 @Mapper
 public interface UserMapper {
 
+    // 사용자 전체 조회
     List<User> findAll();
 
+    // 사용자 전체 조회(관리자용)
     List<User> findAllAdminPage();
 
     // 회원가입

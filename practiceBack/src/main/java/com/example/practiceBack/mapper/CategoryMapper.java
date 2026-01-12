@@ -7,5 +7,6 @@ import java.util.List;
 
 @Mapper
 public interface CategoryMapper {
+    // 분류 전체 조회
     List<Category> findAll();
 }

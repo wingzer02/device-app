@@ -9,8 +9,8 @@
     <select id="findUsersByAssetSerialNumber"
             resultType="com.example.practiceBack.dto.User">
         SELECT
-        u.userid,
-        u.name
+            u.userid,
+            u.name
         FROM asset_user_rel aur
         JOIN user u
         ON aur.userid = u.userid
@@ -26,8 +26,14 @@
 
     <!-- 자산-사용자 매핑 등록 -->
     <insert id="insertAssetUser">
-        INSERT INTO asset_user_rel(asset_serial_number, userid)
-        VALUES (#{assetSerialNumber}, #{userid})
+        INSERT INTO asset_user_rel(
+            asset_serial_number,
+            userid
+        )
+        VALUES (
+            #{assetSerialNumber},
+            #{userid}
+        )
     </insert>
 
     <delete id="deleteByUserId" parameterType="string">

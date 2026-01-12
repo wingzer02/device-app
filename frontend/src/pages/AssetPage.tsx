@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, Link as RouterLink } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../hooks/useApp";
-import { fetchAssets, deleteAsset, Asset } from "../store/assetSlice";
+import { deleteAsset, Asset, fetchAssetsPage } from "../store/assetSlice";
 import { logoutUser } from "../store/userSlice";
 import { fetchDevices } from "../store/deviceSlice";
 import { fetchLogByAssetSerialNumber } from "../store/logSlice";
@@ -39,12 +39,12 @@ const AssetPage: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const { list: assets } = useAppSelector((s) => s.asset);
+  const { list: assets, totalPages } = useAppSelector((s) => s.asset);
   const { list: devices } = useAppSelector((s) => s.device);
   const { log } = useAppSelector((s) => s.log);
   const { isAuthenticated, profile } = useAppSelector((s) => s.user);
 
-  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState("");
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [page, setPage] = useState(1);
   const rowsPerPage = 10;
@@ -58,16 +58,19 @@ const AssetPage: React.FC = () => {
   const isGuest = profile.role === "guest";
 
   useEffect(() => {
-    dispatch(fetchAssets());
     dispatch(fetchDevices());
   }, [dispatch]);
 
   useEffect(() => {
-    const lastPage = Math.max(1, Math.ceil(assets.length / rowsPerPage));
-    if (page > lastPage) {
-      setPage(lastPage);
-    }
-  }, [assets.length, page, rowsPerPage])
+    dispatch(
+      fetchAssetsPage({
+        page,
+        size: rowsPerPage,
+        sortKey,
+        sortDir: sortDirection,
+      })
+    );
+  }, [dispatch, page, rowsPerPage, sortKey, sortDirection]);
 
   // 뒤로 버튼 클릭
   const handleLogout = () => {
@@ -75,6 +78,7 @@ const AssetPage: React.FC = () => {
     navigate("/");
   };
 
+  // 자산 등록 클릭
   const handleAssetRegister = () => {
     navigate("/assets/register");
   };
@@ -85,88 +89,53 @@ const AssetPage: React.FC = () => {
     setDeleteConfirmOpen(true);
   };
 
+  // 자산 삭제 모달 - 확인 버튼 클릭
   const handleDeleteConfirm = async () => {
-    if (!deleteTarget) return;
     await dispatch(deleteAsset(deleteTarget));
-    await dispatch(fetchAssets());
-    setDeleteTarget(null);
+    setDeleteTarget("");
     setDeleteConfirmOpen(false);
+
+    if (page === 1) {
+      dispatch(
+        fetchAssetsPage({
+          page: 1,
+          size: rowsPerPage,
+          sortKey,
+          sortDir: sortDirection,
+        })
+      );
+    } else {
+      setPage(1);
+    }
   };
 
+  // 자산 삭제 모달 - 취소 버튼 클릭
   const handleDeleteCancel = () => {
-    setDeleteTarget(null);
+    setDeleteTarget("");
     setDeleteConfirmOpen(false);
   };
 
+  // 자산 일련번호 클릭
   const handleSerialNumberClick = (asset: Asset) => {
     dispatch(fetchLogByAssetSerialNumber(asset.assetSerialNumber));
     setLogModalOpen(true);    
   }
 
+  // 페이지 변경
   const handleChangePage = (_event: unknown, value: number) => {
     setPage(value);
   };
 
+  // 테이블 헤더 클릭 (레코드 정렬)
   const handleSort = (key: string) => {
     if (sortKey === key) {
-      if (sortDirection === "asc") {
-        setSortDirection("desc");
-      } else {
-        setSortDirection("asc");
-      }
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
       setSortKey(key);
       setSortDirection("asc");
     }
     setPage(1);
   };
-
-  const sortList = useMemo(() => {
-    const arr = [...assets];
-    const getVal = (a: Asset) => {
-      switch (sortKey) {
-        case 'location' : return a.location;
-        case 'startDate' : return a.startDate;
-        case 'endDate' : return a.endDate;
-        default : return "";
-      }
-    }
-    arr.sort((a, b) => {
-      const av = getVal(a);
-      const bv = getVal(b);
-
-      // 값이 없으면 맨 뒤로 배치
-      if (!av) return 1;
-      if (!bv) return -1;
-
-      // 날짜의 경우
-      if (sortKey === "startDate" || sortKey === "endDate") {
-        const at = new Date(av).getTime();
-        const bt = new Date(bv).getTime();
-        return sortDirection === "asc" ? at - bt : bt - at;
-      // 날짜 이외의 경우 (문자)
-      } else {
-        if (av < bv) {
-          return sortDirection === "asc" ? -1 : 1;
-        }
-        if (av > bv) {
-          return sortDirection === "asc" ? 1 : -1;
-        }
-        return 0;
-      }
-    })
-    return arr;
-  }, [assets, sortKey, sortDirection]);
-
-  const pageCount = Math.max(1, Math.ceil(sortList.length / rowsPerPage));
-
-  const pagedAssets = useMemo(
-    () => sortList.slice(
-      (page - 1) * rowsPerPage,
-      (page - 1) * rowsPerPage + rowsPerPage
-    ),
-    [sortList, page, rowsPerPage]
-  );
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
@@ -239,12 +208,14 @@ const AssetPage: React.FC = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {pagedAssets.map((a) => {
+                    {assets.map((a) => {
+                      // 장비 정보 조회
                       const device = devices.find(
                         d => d.serialNumber === a.deviceSerialNumber
                       );
                       const isPc = device && Number(device.catId) === 2;
 
+                      // 사용자명 표시 처리
                       const userNames = a.userNames ?? [];
                       const primaryName = userNames[0] ?? "-";
                       const extraCount = userNames.length === 2 ? 1 : 0;
@@ -313,7 +284,7 @@ const AssetPage: React.FC = () => {
               </TableContainer>
               <Box sx={{ display: "flex", justifyContent: "center", py: 2 }}>
                 <Pagination
-                  count={pageCount}
+                  count={totalPages}
                   page={page}
                   onChange={handleChangePage}
                   color="primary"

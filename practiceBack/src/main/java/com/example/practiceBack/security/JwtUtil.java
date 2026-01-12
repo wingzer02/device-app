@@ -13,7 +13,7 @@ public class JwtUtil {
 
     private static final String SECRET_KEY = "my-super-secret-key-my-super-secret-key";
     private static final long ACCESS_TOKEN_EXP = 1000 * 60 * 10;
-    private static final long REFRESH_TOKEN_EXP = 1000L * 60 * 60 * 24 * 7; // 7일
+    private static final long REFRESH_TOKEN_EXP = 1000 * 60 * 60;
 
     private final Key key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
 

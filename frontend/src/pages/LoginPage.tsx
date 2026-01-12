@@ -16,6 +16,7 @@ const LoginPage: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
+  // 로그인 버튼 클릭
   const handleLogin = async (e: React.FormEvent) => {
     try {
       e.preventDefault();

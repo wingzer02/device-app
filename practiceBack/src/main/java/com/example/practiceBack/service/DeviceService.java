@@ -1,6 +1,5 @@
 package com.example.practiceBack.service;
 
-import com.example.practiceBack.dto.Asset;
 import com.example.practiceBack.dto.Device;
 import com.example.practiceBack.mapper.AssetMapper;
 import com.example.practiceBack.mapper.DeviceMapper;

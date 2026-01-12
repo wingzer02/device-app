@@ -5,8 +5,8 @@
 
     <select id="findAll" resultType="com.example.practiceBack.dto.Role">
         SELECT
-        role_id,
-        role_name
+            role_id,
+            role_name
         FROM role
     </select>
 

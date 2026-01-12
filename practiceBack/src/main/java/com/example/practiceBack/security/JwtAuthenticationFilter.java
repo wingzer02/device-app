@@ -2,7 +2,6 @@ package com.example.practiceBack.security;
 
 import com.example.practiceBack.dto.User;
 import com.example.practiceBack.service.UserService;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

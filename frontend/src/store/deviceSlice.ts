@@ -54,7 +54,6 @@ export const deleteDevice = createAsyncThunk(
       return res.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        console.log(error);
         const message = error.response?.data?.message;
         return rejectWithValue(
           "해당 장비는 관리코드 " 

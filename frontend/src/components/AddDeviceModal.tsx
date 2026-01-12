@@ -53,11 +53,12 @@ const AddDeviceModal: React.FC<AddDeviceModalProps> = ({
     }
   }, [dispatch, open]);
 
+  // 등록 버튼 클릭
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const fixedCompany =
-      form.company.trim() === "" ? null : form.company.trim();
+      form.company.trim() === "" ? null : form.company;
 
     await dispatch(addDevice({
       serialNumber: form.serialNumber,

@@ -12,6 +12,7 @@ import LogPage from "./pages/LogPage";
 import LogEditPage from "./pages/LogEditPage";
 import { useAppDispatch } from "./hooks/useApp";
 import { checkAuth } from "./store/userSlice";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   const dispatch = useAppDispatch();
@@ -25,14 +26,16 @@ function App() {
       <Routes>
         <Route path="/" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/devices" element={<DevicePage />} />
-        <Route path="/user-info" element={<UserInfoPage />} />
-        <Route path="/user-list" element={<UserListPage />} />
-        <Route path="/assets" element={<AssetPage />} />
-        <Route path="/assets/register" element={<AssetRegisterPage />} />
-        <Route path="/assets/:assetSerialNumber/edit" element={<AssetEditPage />} />
-        <Route path="/logs" element={<LogPage />} />
-        <Route path="/logs/:assetSerialNumber/edit" element={<LogEditPage />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/devices" element={<DevicePage />} />
+          <Route path="/user-info" element={<UserInfoPage />} />
+          <Route path="/user-list" element={<UserListPage />} />
+          <Route path="/assets" element={<AssetPage />} />
+          <Route path="/assets/register" element={<AssetRegisterPage />} />
+          <Route path="/assets/:assetSerialNumber/edit" element={<AssetEditPage />} />
+          <Route path="/logs" element={<LogPage />} />
+          <Route path="/logs/:assetSerialNumber/edit" element={<LogEditPage />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   );

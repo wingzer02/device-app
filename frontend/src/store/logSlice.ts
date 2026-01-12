@@ -33,6 +33,9 @@ const initialState: LogState = {
   },
 };
 
+/**
+ * 전체 조회
+ */
 export const fetchLogs = createAsyncThunk(
   "log/fetchLogs",
   async () => {

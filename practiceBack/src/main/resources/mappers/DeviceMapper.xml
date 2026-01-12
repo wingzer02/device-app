@@ -7,20 +7,32 @@
 
     <select id="findAll" resultType="com.example.practiceBack.dto.Device">
         SELECT
-        d.id,
-        d.serial_number,
-        d.cat_id,
-        c.cat_name,
-        d.device_name,
-        d.company,
-        d.purchase_date
+            d.id,
+            d.serial_number,
+            d.cat_id,
+            c.cat_name,
+            d.device_name,
+            d.company,
+            d.purchase_date
         FROM device d
-        LEFT JOIN category c ON c.cat_id = d.cat_id;
+        JOIN category c ON c.cat_id = d.cat_id;
     </select>
 
     <insert id="insertDevice" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO device (serial_number, cat_id, device_name, company, purchase_date)
-        VALUES (#{serialNumber}, #{catId}, #{deviceName}, #{company}, #{purchaseDate});
+        INSERT INTO device (
+            serial_number,
+            cat_id,
+            device_name,
+            company,
+            purchase_date
+        )
+        VALUES (
+            #{serialNumber},
+            #{catId},
+            #{deviceName},
+            #{company},
+            #{purchaseDate}
+        );
     </insert>
 
     <delete id="deleteBySerialNumber" parameterType="string">
@@ -30,7 +42,7 @@
 
     <select id="findCatIdBySerialNumber" parameterType="string" resultType="int">
         SELECT
-        cat_id
+            cat_id
         FROM device
         WHERE serial_number = #{serialNumber};
     </select>

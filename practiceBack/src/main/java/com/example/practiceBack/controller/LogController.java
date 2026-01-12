@@ -16,16 +16,19 @@ public class LogController {
         this.logService = logService;
     }
 
+    // 로그 전체 조회
     @GetMapping
     public List<Log> getAllLogs() {
         return logService.findAll();
     }
 
+    // 해당 자산 관련번호 로그 조회
     @GetMapping("/{assetSerialNumber}")
     public Log getLog(@PathVariable String assetSerialNumber) {
         return logService.getLog(assetSerialNumber);
     }
 
+    // 로그 갱신
     @PutMapping("/{assetSerialNumber}")
     public void updateLog(@PathVariable String assetSerialNumber, @RequestBody Log log) {
         log.setAssetSerialNumber(assetSerialNumber);
